@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="MeshBank - Offline Microbank & POS Network. Bank without internet.">
+    <meta name="theme-color" content="#0a0e17">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>MeshBank — Offline Microbank</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-mesh"></div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- ============ AUTH SCREEN ============ -->
+    <div id="auth-screen" class="auth-page">
+        <div class="auth-logo">🏦</div>
+        <h1 class="auth-title">MeshBank</h1>
+        <p class="auth-subtitle">Offline Microbank & POS Network</p>
+
+        <!-- Login Form -->
+        <div id="login-form" class="auth-form">
+            <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" id="login-phone" class="form-input" placeholder="Enter phone number" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label class="form-label">PIN</label>
+                <input type="password" id="login-pin" class="form-input" placeholder="Enter 4-digit PIN" maxlength="6" autocomplete="off">
+            </div>
+            <button id="login-btn" class="btn btn-primary" onclick="handleLogin()">
+                Sign In
+            </button>
+            <p class="auth-toggle">
+                Don't have an account? <span class="link" onclick="showRegister()">Create one</span>
+            </p>
+            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border);">
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;">DEMO ACCOUNTS</p>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <button class="btn btn-secondary btn-small" onclick="demoLogin('5551001', '1234')">👩 Alice (5551001 / 1234)</button>
+                    <button class="btn btn-secondary btn-small" onclick="demoLogin('5551002', '5678')">👨 Bob (5551002 / 5678)</button>
+                    <button class="btn btn-secondary btn-small" onclick="demoLogin('5551003', '9999')">☕ Charlie's Coffee (5551003 / 9999)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Form -->
+        <div id="register-form" class="auth-form" style="display:none;">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" id="reg-name" class="form-input" placeholder="Enter your name" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" id="reg-phone" class="form-input" placeholder="Enter phone number" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Create PIN</label>
+                <input type="password" id="reg-pin" class="form-input" placeholder="4-digit PIN" maxlength="6" autocomplete="off">
+            </div>
+            <div class="toggle-container">
+                <span class="toggle-label">Register as Vendor</span>
+                <div id="reg-vendor-toggle" class="toggle" onclick="this.classList.toggle('active')"></div>
+            </div>
+            <button class="btn btn-primary" onclick="handleRegister()">Create Account</button>
+            <p class="auth-toggle">
+                Already have an account? <span class="link" onclick="showLogin()">Sign in</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- ============ MAIN APP ============ -->
+    <div id="app-screen" class="app-container" style="display:none;">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <div class="logo-icon">🏦</div>
+                <span class="logo-text">MeshBank</span>
+            </div>
+            <div class="header-actions">
+                <div class="status-dot" title="Offline Mode Active"></div>
+                <button class="header-btn" onclick="syncToCloud()" title="Sync to Cloud">☁️</button>
+                <button class="header-btn" onclick="handleLogout()" title="Logout">⏏️</button>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="page-content">
+            <!-- DASHBOARD -->
+            <div id="page-dashboard" class="page active">
+                <div class="balance-card">
+                    <div class="balance-label">Available Balance</div>
+                    <div id="dashboard-balance" class="balance-amount">$0.00</div>
+                    <div class="balance-actions">
+                        <button class="balance-action-btn" onclick="navigateTo('send')">📤 Send</button>
+                        <button class="balance-action-btn" onclick="navigateTo('receive')">📥 Receive</button>
+                        <button class="balance-action-btn" onclick="showDepositModal()">➕ Deposit</button>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <div class="quick-action" onclick="navigateTo('send')">
+                        <div class="quick-action-icon send">📤</div>
+                        <span class="quick-action-label">Send</span>
+                    </div>
+                    <div class="quick-action" onclick="navigateTo('receive')">
+                        <div class="quick-action-icon receive">📥</div>
+                        <span class="quick-action-label">Receive</span>
+                    </div>
+                    <div class="quick-action" onclick="navigateTo('vendor')">
+                        <div class="quick-action-icon vendor">🏪</div>
+                        <span class="quick-action-label">POS</span>
+                    </div>
+                    <div class="quick-action" onclick="navigateTo('ai')">
+                        <div class="quick-action-icon ai">🤖</div>
+                        <span class="quick-action-label">AI</span>
+                    </div>
+                </div>
+
+                <!-- AI Alerts Preview -->
+                <div id="dashboard-alerts"></div>
+
+                <div class="section-header">
+                    <span class="section-title">Recent Activity</span>
+                    <button class="section-link" onclick="navigateTo('transactions')">See all →</button>
+                </div>
+                <div id="dashboard-transactions" class="txn-list">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p class="empty-state-text">No transactions yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEND MONEY -->
+            <div id="page-send" class="page">
+                <h2 class="page-title">Send Money</h2>
+                <div class="card">
+                    <div class="form-group">
+                        <label class="form-label">Recipient Phone</label>
+                        <input type="tel" id="send-phone" class="form-input" placeholder="Enter phone number">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Amount ($)</label>
+                        <input type="number" id="send-amount" class="form-input form-input-large" placeholder="0.00" step="0.01" min="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Note (optional)</label>
+                        <input type="text" id="send-note" class="form-input" placeholder="What's this for?">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm PIN</label>
+                        <input type="password" id="send-pin" class="form-input" placeholder="Enter PIN" maxlength="6">
+                    </div>
+                    <button id="send-btn" class="btn btn-primary" onclick="handleSend()">
+                        📤 Send Money
+                    </button>
+                </div>
+            </div>
+
+            <!-- RECEIVE / QR -->
+            <div id="page-receive" class="page">
+                <h2 class="page-title">Receive Money</h2>
+                <p class="page-subtitle">Show this QR code to receive payments</p>
+                <div class="card qr-container">
+                    <div id="qr-display" class="qr-code">
+                        <canvas id="user-qr-canvas"></canvas>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 8px;">
+                        <span id="qr-user-name"></span><br>
+                        <span id="qr-user-id" style="font-size: 0.75rem; color: var(--text-muted);"></span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- TRANSACTIONS -->
+            <div id="page-transactions" class="page">
+                <h2 class="page-title">Transactions</h2>
+                <div class="tabs">
+                    <button class="tab active" onclick="filterTransactions('all', this)">All</button>
+                    <button class="tab" onclick="filterTransactions('sent', this)">Sent</button>
+                    <button class="tab" onclick="filterTransactions('received', this)">Received</button>
+                </div>
+                <div id="transactions-list" class="txn-list"></div>
+            </div>
+
+            <!-- VENDOR POS -->
+            <div id="page-vendor" class="page">
+                <h2 class="page-title">🏪 Vendor POS</h2>
+                <div id="vendor-toggle-container" class="toggle-container">
+                    <span class="toggle-label">Vendor Mode</span>
+                    <div id="vendor-mode-toggle" class="toggle" onclick="toggleVendorMode()"></div>
+                </div>
+
+                <div id="vendor-pos-panel" style="display:none;">
+                    <div class="card">
+                        <div class="form-group">
+                            <label class="form-label">Payment Amount ($)</label>
+                            <input type="number" id="vendor-amount" class="form-input form-input-large" placeholder="0.00" step="0.01" min="0.01">
+                        </div>
+                        <button class="btn btn-primary" onclick="createPaymentRequest()">
+                            Generate Payment QR
+                        </button>
+                    </div>
+
+                    <div id="vendor-qr-result" style="display:none;">
+                        <div class="card qr-container">
+                            <p style="color: var(--accent-primary); font-weight: 700; margin-bottom: 8px;">Payment Request</p>
+                            <div id="vendor-amount-display" class="amount-display"></div>
+                            <div class="qr-code">
+                                <canvas id="vendor-qr-canvas"></canvas>
+                            </div>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 12px;">
+                                Customer scans to pay • Request ID: <span id="vendor-request-id"></span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Vendor Dashboard Stats -->
+                    <div id="vendor-stats" style="display:none;">
+                        <div class="section-header">
+                            <span class="section-title">Sales Dashboard</span>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div id="vendor-total-revenue" class="stat-value">$0</div>
+                                <div class="stat-label">Total Revenue</div>
+                            </div>
+                            <div class="stat-card">
+                                <div id="vendor-total-txns" class="stat-value">0</div>
+                                <div class="stat-label">Transactions</div>
+                            </div>
+                            <div class="stat-card">
+                                <div id="vendor-today-revenue" class="stat-value">$0</div>
+                                <div class="stat-label">Today's Revenue</div>
+                            </div>
+                            <div class="stat-card">
+                                <div id="vendor-today-txns" class="stat-value">0</div>
+                                <div class="stat-label">Today's Sales</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulate vendor payment (customer side) -->
+                <div id="customer-pay-panel" class="card" style="margin-top: 20px;">
+                    <div class="section-header" style="margin-bottom:12px;">
+                        <span class="section-title">Pay a Vendor</span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Payment Request ID</label>
+                        <input type="text" id="pay-request-id" class="form-input" placeholder="REQ-XXXXXXXX">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm PIN</label>
+                        <input type="password" id="pay-vendor-pin" class="form-input" placeholder="Enter PIN" maxlength="6">
+                    </div>
+                    <button class="btn btn-primary" onclick="payVendor()">💳 Pay Now</button>
+                </div>
+            </div>
+
+            <!-- AI INSIGHTS -->
+            <div id="page-ai" class="page">
+                <h2 class="page-title">🧠 AI Insights</h2>
+                <div class="tabs">
+                    <button class="tab active" onclick="showAITab('insights', this)">Insights</button>
+                    <button class="tab" onclick="showAITab('fraud', this)">Fraud</button>
+                    <button class="tab" onclick="showAITab('predict', this)">Predict</button>
+                    <button class="tab" onclick="showAITab('chat', this)">Chat</button>
+                </div>
+
+                <!-- Insights Panel -->
+                <div id="ai-insights-panel" class="ai-panel">
+                    <div id="ai-insights-list"></div>
+                </div>
+
+                <!-- Fraud Panel -->
+                <div id="ai-fraud-panel" class="ai-panel" style="display:none;">
+                    <div id="ai-fraud-report"></div>
+                </div>
+
+                <!-- Prediction Panel -->
+                <div id="ai-predict-panel" class="ai-panel" style="display:none;">
+                    <div id="ai-prediction-report"></div>
+                </div>
+
+                <!-- Chat Panel -->
+                <div id="ai-chat-panel" class="ai-panel" style="display:none;">
+                    <div class="chat-container">
+                        <div id="chat-messages" class="chat-messages">
+                            <div class="chat-bubble bot">
+                                👋 <strong>Hello! I'm MeshBot.</strong><br>
+                                Ask me about your balance, transactions, or how to use MeshBank!
+                            </div>
+                        </div>
+                        <div class="chat-input-area">
+                            <input type="text" id="chat-input" class="form-input" placeholder="Ask MeshBot..." onkeydown="if(event.key==='Enter')sendChat()">
+                            <button class="chat-send-btn" onclick="sendChat()">➤</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="navigateTo('dashboard')" id="nav-dashboard">
+                <span class="nav-icon">🏠</span>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" onclick="navigateTo('send')" id="nav-send">
+                <span class="nav-icon">📤</span>
+                <span>Send</span>
+            </button>
+            <button class="nav-item" onclick="navigateTo('receive')" id="nav-receive">
+                <span class="nav-icon">📥</span>
+                <span>Receive</span>
+            </button>
+            <button class="nav-item" onclick="navigateTo('transactions')" id="nav-transactions">
+                <span class="nav-icon">📋</span>
+                <span>History</span>
+            </button>
+            <button class="nav-item" onclick="navigateTo('ai')" id="nav-ai">
+                <span class="nav-icon">🤖</span>
+                <span>AI</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- ============ MODALS ============ -->
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-handle"></div>
+            <div class="success-screen">
+                <div class="success-icon">✓</div>
+                <div id="success-amount" class="success-amount"></div>
+                <div id="success-message" class="success-to"></div>
+                <div id="success-receipt" style="margin-bottom: 24px; text-align: left;"></div>
+                <button class="btn btn-primary" onclick="closeModals(); refreshDashboard();">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div id="deposit-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-handle"></div>
+            <h3 style="margin-bottom: 20px; font-weight: 700;">➕ Add Funds</h3>
+            <div class="form-group">
+                <label class="form-label">Amount ($)</label>
+                <input type="number" id="deposit-amount" class="form-input form-input-large" placeholder="0.00" step="0.01" min="0.01">
+            </div>
+            <button class="btn btn-primary" onclick="handleDeposit()">Add Funds</button>
+            <button class="btn btn-secondary" style="margin-top: 10px;" onclick="closeModals()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/qr.js"></script>
+    <script src="js/assistant.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
