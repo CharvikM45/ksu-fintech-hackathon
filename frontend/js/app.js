@@ -8,6 +8,7 @@ const API = '';  // Same-origin
 // ============ STATE ============
 let currentUser = null;
 let allTransactions = [];
+let userKeys = null; // { publicKey, privateKey }
 
 // ============ UTILS ============
 function showToast(message, type = 'success') {
@@ -19,6 +20,54 @@ function showToast(message, type = 'success') {
     setTimeout(() => toast.remove(), 3000);
 }
 
+// ============ CRYPTO HELPERS ============
+async function initKeys() {
+    const stored = localStorage.getItem(`mb_keys_${currentUser?.id || 'guest'}`);
+    if (stored) {
+        try {
+            const keys = JSON.parse(stored);
+            const pub = await window.crypto.subtle.importKey("spki", base64ToUint8Array(keys.pub), { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"]);
+            const priv = await window.crypto.subtle.importKey("pkcs8", base64ToUint8Array(keys.priv), { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]);
+            userKeys = { publicKey: pub, privateKey: priv, pubPem: keys.pubPem };
+            return;
+        } catch (e) { console.error("Key import failed", e); }
+    }
+    
+    // Generate new if none
+    const keyPair = await window.crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+    const pubExport = await window.crypto.subtle.exportKey("spki", keyPair.publicKey);
+    const privExport = await window.crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
+    
+    const pubBase64 = uint8ArrayToBase64(new Uint8Array(pubExport));
+    const privBase64 = uint8ArrayToBase64(new Uint8Array(privExport));
+    const pubPem = `-----BEGIN PUBLIC KEY-----\n${pubBase64}\n-----END PUBLIC KEY-----`;
+    
+    userKeys = { ...keyPair, pubPem };
+    if (currentUser) {
+        localStorage.setItem(`mb_keys_${currentUser.id}`, JSON.stringify({ pub: pubBase64, priv: privBase64, pubPem }));
+    }
+}
+
+function uint8ArrayToBase64(arr) {
+    return btoa(String.fromCharCode.apply(null, arr));
+}
+
+function base64ToUint8Array(base64) {
+    const binary = atob(base64);
+    const arr = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
+    return arr;
+}
+
+async function signTransaction(dataObj) {
+    if (!userKeys) await initKeys();
+    const dataStr = `${dataObj.sender_id}|${dataObj.receiver_phone || ''}|${dataObj.amount}|${dataObj.timestamp}|${dataObj.idempotency_key}`;
+    const encoder = new TextEncoder();
+    const encoded = encoder.encode(dataStr);
+    const signature = await window.crypto.subtle.sign({ name: "ECDSA", hash: { name: "SHA-256" } }, userKeys.privateKey, encoded);
+    return uint8ArrayToBase64(new Uint8Array(signature));
+}
+
 async function apiCall(endpoint, options = {}) {
     try {
         const res = await fetch(API + endpoint, {
@@ -27,7 +76,10 @@ async function apiCall(endpoint, options = {}) {
         });
         const data = await res.json();
         if (!res.ok) {
-            throw new Error(data.error || 'Something went wrong');
+            const err = new Error(data.error || 'Something went wrong');
+            err.risk_reasons = data.risk_reasons || [];
+            err.risk_level = data.risk_level || null;
+            throw err;
         }
         return data;
     } catch (err) {
@@ -85,6 +137,7 @@ async function handleLogin() {
             body: JSON.stringify({ phone, pin })
         });
         currentUser = data.user;
+        await initKeys(); // Load or generate keys
         showToast(`Welcome back, ${currentUser.name}!`);
         showApp();
     } catch (err) {
@@ -108,11 +161,13 @@ async function handleRegister() {
     }
 
     try {
+        await initKeys(); // Generate keys for new user
         const data = await apiCall('/api/register', {
             method: 'POST',
-            body: JSON.stringify({ name, phone, pin, is_vendor: isVendor })
+            body: JSON.stringify({ name, phone, pin, is_vendor: isVendor, public_key: userKeys.pubPem })
         });
         currentUser = data.user;
+        localStorage.setItem(`mb_keys_${currentUser.id}`, localStorage.getItem('mb_keys_guest')); // Migration
         showToast('Account created!');
         showApp();
     } catch (err) {
@@ -133,6 +188,9 @@ function handleLogout() {
 function showApp() {
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('app-screen').style.display = 'flex';
+    if (currentUser) {
+        document.getElementById('header-avatar').textContent = currentUser.name.charAt(0).toUpperCase();
+    }
     refreshDashboard();
     navigateTo('dashboard');
 }
@@ -150,6 +208,9 @@ function navigateTo(page) {
 
     // Trigger page-specific loads
     switch(page) {
+        case 'settings':
+            loadSettingsPage();
+            break;
         case 'dashboard':
             refreshDashboard();
             break;
@@ -158,6 +219,10 @@ function navigateTo(page) {
             break;
         case 'receive':
             loadQRCode();
+            loadPendingRequests();
+            break;
+        case 'send':
+            loadPendingRequests();
             break;
         case 'vendor':
             loadVendorPage();
@@ -176,6 +241,17 @@ async function refreshDashboard() {
         const userData = await apiCall(`/api/balance/${currentUser.id}`);
         currentUser.balance = userData.balance;
         document.getElementById('dashboard-balance').textContent = formatCurrency(userData.balance);
+        
+        // Update Daily Limit
+        const dailyLimitEl = document.getElementById('dashboard-daily-limit');
+        if (dailyLimitEl) {
+            const fraud = await apiCall(`/api/ai/fraud/${currentUser.id}`);
+            const limitLeft = (fraud.velocity_limit || 0) - (fraud.risk_factors?.amount_last_24h || 0);
+            dailyLimitEl.textContent = formatCurrency(Math.max(0, limitLeft));
+        }
+
+        const headerBal = document.getElementById('header-balance');
+        if (headerBal) headerBal.textContent = formatCurrency(userData.balance);
     } catch (err) {}
 
     // Load recent transactions
@@ -190,6 +266,9 @@ async function refreshDashboard() {
         const fraud = await apiCall(`/api/ai/fraud/${currentUser.id}`);
         renderAlerts(fraud);
     } catch (err) {}
+
+    // Update pending requests badge
+    loadPendingRequests();
 }
 
 function renderAlerts(fraudData) {
@@ -256,7 +335,7 @@ async function loadTransactions() {
 }
 
 function filterTransactions(filter, btn) {
-    document.querySelectorAll('#page-transactions .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#page-transactions .segment').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
 
     let filtered = allTransactions;
@@ -278,15 +357,24 @@ async function handleSend() {
     }
 
     try {
+        const idempotency_key = crypto.randomUUID();
+        const timestamp = new Date().toISOString();
+        const payload = {
+            sender_id: currentUser.id,
+            receiver_phone: phone,
+            amount: parseFloat(amount),
+            pin,
+            note,
+            idempotency_key,
+            timestamp
+        };
+        
+        // Sign the transaction
+        payload.signature = await signTransaction(payload);
+
         const data = await apiCall('/api/transfer', {
             method: 'POST',
-            body: JSON.stringify({
-                sender_id: currentUser.id,
-                receiver_phone: phone,
-                amount: parseFloat(amount),
-                pin,
-                note
-            })
+            body: JSON.stringify(payload)
         });
 
         // Show success
@@ -321,7 +409,11 @@ async function handleSend() {
 
         currentUser.balance = data.new_balance;
     } catch (err) {
-        showToast(err.message, 'error');
+        let msg = err.message || 'Transfer failed';
+        if (err.risk_reasons && err.risk_reasons.length > 0) {
+            msg += '\n\nFlagged because:\n• ' + err.risk_reasons.join('\n• ');
+        }
+        showToast(msg, 'error');
     }
 }
 
@@ -446,9 +538,53 @@ async function payVendor() {
     }
 }
 
+async function payVendorDirect() {
+    const vendorId = document.getElementById('pay-vendor-id').value.trim();
+    const amount = document.getElementById('pay-vendor-amount').value;
+    const pin = document.getElementById('pay-vendor-pin').value.trim();
+
+    if (!vendorId || !amount || !pin) {
+        showToast('Please fill all fields', 'error');
+        return;
+    }
+
+    try {
+        const data = await apiCall('/api/vendor/pay-direct', {
+            method: 'POST',
+            body: JSON.stringify({
+                vendor_id: vendorId,
+                customer_id: currentUser.id,
+                amount: parseFloat(amount),
+                pin
+            })
+        });
+
+        document.getElementById('success-amount').textContent = formatCurrency(data.transaction.amount);
+        document.getElementById('success-message').textContent = `Paid to ${data.transaction.receiver}`;
+        document.getElementById('success-receipt').innerHTML = `
+            <div style="margin-top:16px;font-size:0.8rem;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                    <span style="color:var(--text-muted)">Transaction ID</span>
+                    <span style="font-weight:600">${data.transaction.id}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--text-muted)">New Balance</span>
+                    <span style="font-weight:700">${formatCurrency(data.new_balance)}</span>
+                </div>
+            </div>`;
+        document.getElementById('success-modal').classList.add('active');
+        document.getElementById('pay-vendor-id').value = '';
+        document.getElementById('pay-vendor-amount').value = '';
+        document.getElementById('pay-vendor-pin').value = '';
+        refreshDashboard();
+    } catch (err) {
+        showToast(err.message || 'Payment failed', 'error');
+    }
+}
+
 // ============ AI ============
 function showAITab(tab, btn) {
-    document.querySelectorAll('#page-ai .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#page-ai .segment').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
     document.querySelectorAll('.ai-panel').forEach(p => p.style.display = 'none');
     document.getElementById(`ai-${tab}-panel`).style.display = 'block';
@@ -517,26 +653,54 @@ async function loadFraudReport() {
                 const cls = alert.type === 'warning' ? 'alert-warning' : 'alert-info';
                 html += `<div class="alert ${cls}"><span>🛡️</span> ${alert.message}</div>`;
             }
-        } else {
-            html += `<div class="alert alert-success"><span>✅</span> No suspicious activity detected. Your account is safe.</div>`;
         }
 
         if (data.flagged_transactions && data.flagged_transactions.length > 0) {
-            html += `<div class="section-header" style="margin-top:20px;"><span class="section-title">Flagged Transactions</span></div>`;
-            for (const txn of data.flagged_transactions) {
-                html += `
-                    <div class="txn-item">
-                        <div class="txn-icon sent">⚠️</div>
-                        <div class="txn-details">
-                            <div class="txn-name">${txn.id} <span class="badge badge-${txn.risk_level === 'medium' ? 'warning' : 'danger'}">${txn.risk_level}</span></div>
-                            <div class="txn-meta">${formatCurrency(txn.amount)} • ${formatTime(txn.created_at)}</div>
-                        </div>
-                    </div>`;
+            html += `<div class="section-title mt-4">Flagged Transactions</div>`;
+            for (const t of data.flagged_transactions) {
+                // ... (existing logic)
             }
         }
+        
+        // Add Daily Limit Visual
+        const limitLeft = (data.velocity_limit || 0) - (data.risk_factors?.amount_last_24h || 0);
+        const usagePct = data.velocity_limit > 0 ? (data.risk_factors.amount_last_24h / data.velocity_limit * 100) : 0;
+        
+        html += `
+            <div class="section-title mt-4">Daily Spending Limit</div>
+            <div class="glass-panel">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                    <span style="font-size:0.85rem;color:var(--text-secondary);">Used Today</span>
+                    <span style="font-weight:600;">${formatCurrency(data.risk_factors.amount_last_24h)} / ${formatCurrency(data.velocity_limit)}</span>
+                </div>
+                <div style="height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;">
+                    <div style="height:100%;width:${Math.min(usagePct, 100)}%;background:${usagePct > 80 ? 'var(--danger)' : 'var(--primary)'};transition:width 0.5s ease;"></div>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">
+                    Your limit is based on account age (${data.risk_factors.account_age_days} days).
+                </div>
+            </div>`;
 
         container.innerHTML = html;
     } catch (err) {}
+}
+
+function showFraudDetail(txnId) {
+    const txn = allTransactions.find(t => t.id === txnId);
+    if (!txn) return;
+    
+    let reasons = txn.risk_reasons || [];
+    if (typeof reasons === 'string') {
+        try { reasons = JSON.parse(reasons); } catch(e) { reasons = []; }
+    }
+    
+    let msg = `Transaction: ${txnId}\nAmount: ${formatCurrency(txn.amount)}\n\nRisk Assessment:\n`;
+    if (reasons.length > 0) {
+        msg += '• ' + reasons.join('\n• ');
+    } else {
+        msg += 'No specific risk factors recorded.';
+    }
+    alert(msg);
 }
 
 async function loadPrediction() {
@@ -609,6 +773,185 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// ============ MONEY REQUESTS ============
+async function sendMoneyRequest() {
+    const phone = document.getElementById('request-phone').value.trim();
+    const amount = document.getElementById('request-amount').value;
+    const note = document.getElementById('request-note').value.trim();
+
+    if (!phone || !amount) {
+        showToast('Phone and amount are required', 'error');
+        return;
+    }
+
+    try {
+        const data = await apiCall('/api/money-request', {
+            method: 'POST',
+            body: JSON.stringify({
+                requester_id: currentUser.id,
+                target_phone: phone,
+                amount: parseFloat(amount),
+                note
+            })
+        });
+        showToast(data.message, 'success');
+        document.getElementById('request-phone').value = '';
+        document.getElementById('request-amount').value = '';
+        document.getElementById('request-note').value = '';
+    } catch (err) {
+        showToast(err.message || 'Failed to send request', 'error');
+    }
+}
+
+async function loadPendingRequests() {
+    if (!currentUser) return;
+    try {
+        const data = await apiCall(`/api/money-requests/${currentUser.id}`);
+        const receiveContainer = document.getElementById('pending-requests-list');
+        const sendContainer = document.getElementById('pending-requests-list-send');
+        const badge = document.getElementById('pending-count-badge');
+        
+        if (badge) {
+            if (data.requests && data.requests.length > 0) {
+                badge.textContent = data.requests.length;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        const renderList = (requests) => {
+            if (!requests || requests.length === 0) {
+                return '<div class="glass-panel" style="text-align:center;color:var(--text-muted);padding:20px;">No pending requests</div>';
+            }
+            return requests.map(r => `
+                <div class="glass-panel mb-3" style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <div style="font-weight:600;color:#fff;">${r.requester_name} requests</div>
+                        <div style="font-size:1.2rem;font-weight:700;color:var(--primary);">${formatCurrency(r.amount)}</div>
+                        ${r.note ? `<div style="font-size:0.8rem;color:var(--text-secondary);margin-top:4px;">${r.note}</div>` : ''}
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn btn-primary btn-sm" onclick="fulfillRequest('${r.id}', ${r.amount})">Pay</button>
+                        <button class="btn btn-secondary btn-sm" onclick="declineRequest('${r.id}')">Decline</button>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        if (receiveContainer) receiveContainer.innerHTML = renderList(data.requests);
+        if (sendContainer) sendContainer.innerHTML = renderList(data.requests);
+    } catch (err) {
+        console.error('Failed to load requests', err);
+    }
+}
+
+async function fulfillRequest(requestId, amount) {
+    const modal = document.getElementById('pin-modal');
+    const input = document.getElementById('pin-modal-input');
+    const msg = document.getElementById('pin-modal-message');
+    const confirmBtn = document.getElementById('pin-modal-confirm');
+
+    if (!modal || !input) return;
+
+    input.value = '';
+    msg.textContent = `Confirm payment of ${formatCurrency(amount)}`;
+    modal.classList.add('active');
+    setTimeout(() => input.focus(), 100);
+
+    // Handle confirm
+    confirmBtn.onclick = async () => {
+        const pin = input.value.trim();
+        if (!pin) {
+            showToast('Please enter your PIN', 'error');
+            return;
+        }
+
+        try {
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Processing...';
+            const idempotency_key = crypto.randomUUID();
+            const timestamp = new Date().toISOString();
+            const payload = {
+                request_id: requestId,
+                action: 'pay',
+                payer_id: currentUser.id,
+                pin,
+                idempotency_key,
+                timestamp
+            };
+            
+            // Sign the response
+            payload.signature = await signTransaction({
+                sender_id: currentUser.id,
+                amount: amount,
+                timestamp,
+                idempotency_key
+            });
+
+            const data = await apiCall('/api/money-request/respond', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+
+            showToast(data.message, 'success');
+            closeModals();
+            loadPendingRequests();
+            refreshDashboard();
+        } catch (err) {
+            let errorMsg = err.message || 'Payment failed';
+            if (err.risk_reasons && err.risk_reasons.length > 0) {
+                errorMsg += '\n\nReasons:\n• ' + err.risk_reasons.join('\n• ');
+            }
+            showToast(errorMsg, 'error');
+        } finally {
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Confirm';
+        }
+    };
+
+    // Handle enter key
+    input.onkeydown = (e) => {
+        if (e.key === 'Enter') confirmBtn.click();
+    };
+}
+
+async function declineRequest(requestId) {
+    try {
+        await apiCall('/api/money-request/respond', {
+            method: 'POST',
+            body: JSON.stringify({
+                request_id: requestId,
+                action: 'decline',
+                payer_id: currentUser.id
+            })
+        });
+        showToast('Request declined', 'success');
+        loadPendingRequests();
+    } catch (err) {
+        showToast(err.message || 'Failed', 'error');
+    }
+}
+
+// ============ SETTINGS ============
+function loadSettingsPage() {
+    if (!currentUser) return;
+    
+    const initial = currentUser.name.charAt(0).toUpperCase();
+    document.getElementById('header-avatar').textContent = initial;
+    document.getElementById('settings-avatar').textContent = initial;
+    document.getElementById('settings-name').textContent = currentUser.name;
+    document.getElementById('settings-phone').textContent = currentUser.phone;
+    
+    const vendorSection = document.getElementById('settings-vendor-section');
+    if (currentUser.is_vendor) {
+        vendorSection.style.display = 'block';
+        document.getElementById('settings-vendor-id').textContent = currentUser.id;
+    } else {
+        vendorSection.style.display = 'none';
+    }
 }
 
 // ============ MODALS ============

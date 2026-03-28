@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     type TEXT NOT NULL CHECK(type IN ('p2p', 'vendor', 'deposit', 'withdrawal')),
     status TEXT DEFAULT 'completed' CHECK(status IN ('completed', 'pending', 'failed', 'flagged')),
     risk_level TEXT DEFAULT 'low' CHECK(risk_level IN ('low', 'medium', 'high')),
+    risk_reasons TEXT,
     note TEXT,
     synced INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -49,7 +50,20 @@ CREATE TABLE IF NOT EXISTS payment_requests (
     FOREIGN KEY (vendor_id) REFERENCES users(id)
 );
 
+CREATE TABLE IF NOT EXISTS money_requests (
+    id TEXT PRIMARY KEY,
+    requester_id TEXT NOT NULL,
+    target_phone TEXT NOT NULL,
+    amount REAL NOT NULL,
+    note TEXT,
+    status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'completed', 'declined')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (requester_id) REFERENCES users(id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_transactions_sender ON transactions(sender_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_receiver ON transactions(receiver_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_synced ON transactions(synced);
 CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
+CREATE INDEX IF NOT EXISTS idx_money_requests_target ON money_requests(target_phone);
+
