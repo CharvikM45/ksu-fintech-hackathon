@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 import uuid
 import bcrypt
+import json
 from models.database import get_db
 
 vendor_bp = Blueprint('vendor', __name__)
@@ -113,13 +114,15 @@ def pay_vendor():
 
     # Fraud check
     from services.fraud_detection import assess_risk
-    risk_level = assess_risk(customer_id, amount, conn)
+    risk_result = assess_risk(customer_id, amount, conn, receiver_id=vendor_id)
+    risk_level = risk_result['level']
 
     if risk_level == 'high':
         conn.close()
         return jsonify({
             'error': 'Transaction flagged for suspicious activity',
-            'risk_level': risk_level
+            'risk_level': risk_level,
+            'risk_reasons': risk_result['reasons']
         }), 403
 
     # Execute payment
@@ -128,8 +131,8 @@ def pay_vendor():
 
     txn_id = f"TXN-{uuid.uuid4().hex[:8].upper()}"
     cursor.execute(
-        "INSERT INTO transactions (id, sender_id, receiver_id, amount, type, status, risk_level, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        (txn_id, customer_id, vendor_id, amount, 'vendor', 'completed', risk_level, f'Payment to {vendor["name"]}')
+        "INSERT INTO transactions (id, sender_id, receiver_id, amount, type, status, risk_level, risk_reasons, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (txn_id, customer_id, vendor_id, amount, 'vendor', 'completed', risk_level, json.dumps(risk_result['reasons']), f'Payment to {vendor["name"]}')
     )
 
     # Create receipt
@@ -141,6 +144,115 @@ def pay_vendor():
 
     # Mark payment request as completed
     cursor.execute("UPDATE payment_requests SET status = 'completed' WHERE id = ?", (request_id,))
+
+    conn.commit()
+
+    cursor.execute("SELECT balance FROM users WHERE id = ?", (customer_id,))
+    new_balance = cursor.fetchone()['balance']
+    conn.close()
+
+    return jsonify({
+        'success': True,
+        'transaction': {
+            'id': txn_id,
+            'sender': customer['name'],
+            'receiver': vendor['name'],
+            'amount': amount,
+            'type': 'vendor',
+            'status': 'completed',
+            'risk_level': risk_level,
+            'receipt_id': receipt_id
+        },
+        'new_balance': new_balance,
+        'message': f'Payment of ${amount:.2f} to {vendor["name"]} successful!'
+    })
+
+
+
+@vendor_bp.route('/api/vendor/pay-direct', methods=['POST'])
+def pay_vendor_direct():
+    """Customer pays a vendor directly by vendor ID and amount."""
+    data = request.get_json()
+
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+
+    vendor_id = data.get('vendor_id', '').strip()
+    customer_id = data.get('customer_id', '').strip()
+    amount = data.get('amount', 0)
+    pin = data.get('pin', '').strip()
+
+    if not vendor_id or not customer_id or not pin or not amount:
+        return jsonify({'error': 'Vendor ID, customer ID, amount, and PIN are required'}), 400
+
+    try:
+        amount = float(amount)
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Invalid amount'}), 400
+
+    if amount <= 0:
+        return jsonify({'error': 'Amount must be greater than 0'}), 400
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Verify vendor
+    cursor.execute("SELECT * FROM users WHERE id = ? AND is_vendor = 1", (vendor_id,))
+    vendor = cursor.fetchone()
+    if not vendor:
+        conn.close()
+        return jsonify({'error': 'Vendor not found or user is not a vendor'}), 404
+
+    # Verify customer
+    cursor.execute("SELECT * FROM users WHERE id = ?", (customer_id,))
+    customer = cursor.fetchone()
+    if not customer:
+        conn.close()
+        return jsonify({'error': 'Customer not found'}), 404
+
+    # Verify PIN
+    if not bcrypt.checkpw(pin.encode('utf-8'), customer['pin_hash'].encode('utf-8')):
+        conn.close()
+        return jsonify({'error': 'Invalid PIN'}), 401
+
+    # Check balance
+    if customer['balance'] < amount:
+        conn.close()
+        return jsonify({'error': 'Insufficient balance'}), 400
+
+    # Prevent self-payment
+    if customer_id == vendor_id:
+        conn.close()
+        return jsonify({'error': 'Cannot pay yourself'}), 400
+
+    # Fraud check
+    from services.fraud_detection import assess_risk
+    risk_result = assess_risk(customer_id, amount, conn, receiver_id=vendor_id)
+    risk_level = risk_result['level']
+
+    if risk_level == 'high':
+        conn.close()
+        return jsonify({
+            'error': 'Transaction flagged for suspicious activity',
+            'risk_level': risk_level,
+            'risk_reasons': risk_result['reasons']
+        }), 403
+
+    # Execute payment
+    cursor.execute("UPDATE users SET balance = balance - ? WHERE id = ?", (amount, customer_id))
+    cursor.execute("UPDATE users SET balance = balance + ? WHERE id = ?", (amount, vendor_id))
+
+    txn_id = f"TXN-{uuid.uuid4().hex[:8].upper()}"
+    cursor.execute(
+        "INSERT INTO transactions (id, sender_id, receiver_id, amount, type, status, risk_level, risk_reasons, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (txn_id, customer_id, vendor_id, amount, 'vendor', 'completed', risk_level, json.dumps(risk_result['reasons']), f'Direct payment to {vendor["name"]}')
+    )
+
+    receipt_id = f"RCP-{uuid.uuid4().hex[:8].upper()}"
+    cursor.execute(
+        "INSERT INTO receipts (id, transaction_id, sender_name, receiver_name, amount, type, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (receipt_id, txn_id, customer['name'], vendor['name'], amount, 'vendor', 'completed')
+    )
 
     conn.commit()
 

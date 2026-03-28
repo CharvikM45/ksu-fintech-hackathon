@@ -87,8 +87,8 @@ if __name__ == '__main__':
     ║        🏦 MeshBank Server v1.0           ║
     ║    Offline Microbank & POS Network       ║
     ╠══════════════════════════════════════════╣
-    ║  Local:   http://localhost:5000           ║
-    ║  Network: http://192.168.4.1:5000        ║
+    ║  Local:   http://localhost:5001           ║
+    ║  Network: http://192.168.4.1:5001        ║
     ║                                          ║
     ║  Demo accounts seeded:                   ║
     ║  • Alice  (5551001) PIN: 1234            ║
@@ -97,4 +97,4 @@ if __name__ == '__main__':
     ╚══════════════════════════════════════════╝
     """)
 
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)

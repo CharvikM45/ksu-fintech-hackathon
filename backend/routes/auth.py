@@ -37,10 +37,11 @@ def register():
     user_id = f"USR-{uuid.uuid4().hex[:8].upper()}"
     pin_hash = bcrypt.hashpw(pin.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     qr_data = f"meshbank://pay/{user_id}"
+    public_key = data.get('public_key')
 
     cursor.execute(
-        "INSERT INTO users (id, name, phone, pin_hash, balance, is_vendor, qr_data) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        (user_id, name, phone, pin_hash, 0.0, is_vendor, qr_data)
+        "INSERT INTO users (id, name, phone, pin_hash, balance, is_vendor, qr_data, public_key) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (user_id, name, phone, pin_hash, 0.0, is_vendor, qr_data, public_key)
     )
     conn.commit()
     conn.close()
