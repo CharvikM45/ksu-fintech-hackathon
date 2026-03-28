@@ -8,6 +8,10 @@ CREATE TABLE IF NOT EXISTS users (
     pin_hash TEXT NOT NULL,
     balance REAL DEFAULT 0.0,
     is_vendor INTEGER DEFAULT 0,
+    profile_type TEXT DEFAULT 'individual' CHECK(profile_type IN ('student', 'freelancer', 'businessman', 'vendor', 'individual')),
+    occupation TEXT,
+    monthly_income REAL DEFAULT 0,
+    business_name TEXT,
     qr_data TEXT,
     public_key TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -74,6 +78,7 @@ CREATE TABLE IF NOT EXISTS credit_scores (
     balance_trend REAL DEFAULT 0,
     account_age_days INTEGER DEFAULT 0,
     total_transactions INTEGER DEFAULT 0,
+    profile_bonus REAL DEFAULT 0,
     risk_category TEXT DEFAULT 'unscored' CHECK(risk_category IN ('unscored', 'high_risk', 'moderate', 'good', 'excellent')),
     max_loan_eligible REAL DEFAULT 0,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -94,6 +99,20 @@ CREATE TABLE IF NOT EXISTS loans (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+CREATE TABLE IF NOT EXISTS fraud_reports (
+    id TEXT PRIMARY KEY,
+    reporter_id TEXT NOT NULL,
+    reported_id TEXT NOT NULL,
+    transaction_id TEXT,
+    reason TEXT NOT NULL,
+    details TEXT,
+    status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'investigating', 'confirmed', 'dismissed')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (reporter_id) REFERENCES users(id),
+    FOREIGN KEY (reported_id) REFERENCES users(id),
+    FOREIGN KEY (transaction_id) REFERENCES transactions(id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_transactions_sender ON transactions(sender_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_receiver ON transactions(receiver_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_synced ON transactions(synced);
@@ -101,4 +120,3 @@ CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
 CREATE INDEX IF NOT EXISTS idx_credit_scores_user ON credit_scores(user_id);
 CREATE INDEX IF NOT EXISTS idx_loans_user ON loans(user_id);
 CREATE INDEX IF NOT EXISTS idx_money_requests_target ON money_requests(target_phone);
-

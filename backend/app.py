@@ -4,7 +4,8 @@ Flask Application Entry Point
 """
 import os
 import sys
-from flask import Flask, send_from_directory
+import uuid
+from flask import Flask, send_from_directory, request, jsonify
 from flask_cors import CORS
 
 # Add backend to path
@@ -80,6 +81,50 @@ def list_users():
     users = [dict(row) for row in cursor.fetchall()]
     conn.close()
     return {'users': users}
+
+
+@app.route('/api/user-by-phone/<phone>', methods=['GET'])
+def get_user_by_phone(phone):
+    """Find a user by their phone number for reporting/searching."""
+    from models.database import get_db
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, phone, profile_type, is_vendor FROM users WHERE phone = ?", (phone,))
+    user = cursor.fetchone()
+    conn.close()
+    if user:
+        return jsonify(dict(user))
+    return jsonify({'error': 'User not found'}), 404
+
+@app.route('/api/report-fraud', methods=['POST'])
+def report_fraud():
+    """Submit a fraud report for fake money or other scams."""
+    from models.database import get_db
+    data = request.json
+    reporter_id = data.get('reporter_id')
+    reported_id = data.get('reported_id')
+    transaction_id = data.get('transaction_id')
+    reason = data.get('reason')
+    details = data.get('details', '')
+
+    if not reporter_id or not reported_id or not reason:
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
+        report_id = f"FRD-{uuid.uuid4().hex[:8].upper()}"
+        cursor.execute(
+            """INSERT INTO fraud_reports (id, reporter_id, reported_id, transaction_id, reason, details, status) 
+            VALUES (?, ?, ?, ?, ?, ?, 'pending')""",
+            (report_id, reporter_id, reported_id, transaction_id, reason, details)
+        )
+        conn.commit()
+        return jsonify({'message': 'Report submitted successfully. Our security team will review it.', 'report_id': report_id})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
 
 
 if __name__ == '__main__':

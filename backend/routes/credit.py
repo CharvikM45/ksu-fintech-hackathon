@@ -1,6 +1,6 @@
 """
-NanoCredit Loan Engine Routes
-Handles credit score calculation, loan issuance, and repayment.
+TrustScore Loan Engine Routes
+Handles TrustScore calculation, loan issuance, and repayment.
 """
 from flask import Blueprint, request, jsonify
 import uuid
@@ -9,6 +9,21 @@ from models.database import get_db
 from services.credit_scoring import calculate_credit_score
 
 credit_bp = Blueprint('credit', __name__)
+
+
+@credit_bp.route('/api/user-profile/<user_id>', methods=['GET'])
+def get_user_profile(user_id):
+    """Return full user profile information for TrustScore display."""
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name, phone, balance, is_vendor, profile_type, occupation, monthly_income, business_name, created_at FROM users WHERE id = ?", (user_id,))
+        user = cursor.fetchone()
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        return jsonify(dict(user))
+    finally:
+        conn.close()
 
 
 @credit_bp.route('/api/credit-score/<user_id>', methods=['GET'])
@@ -84,7 +99,7 @@ def apply_for_loan():
         if score_result['max_loan_eligible'] <= 0:
             if score_result['active_loans'] > 0:
                 return jsonify({'error': 'You must repay your current loan before applying for a new one'}), 400
-            return jsonify({'error': 'Your Financial Identity Score is too low for a loan. Keep transacting to build your score!'}), 400
+            return jsonify({'error': 'Your TrustScore is too low for a loan. Keep transacting to build trust!'}), 400
 
         if requested_amount > score_result['max_loan_eligible']:
             return jsonify({
@@ -122,7 +137,7 @@ def apply_for_loan():
             INSERT INTO transactions (id, sender_id, receiver_id, amount, type, status, risk_level, note)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (txn_id, user_id, user_id, requested_amount, 'deposit', 'completed', 'low',
-              f'NanoCredit loan disbursement ({loan_id})'))
+              f'TrustScore loan disbursement ({loan_id})'))
 
         conn.commit()
 

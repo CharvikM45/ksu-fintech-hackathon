@@ -24,32 +24,39 @@ def init_db():
         conn.executescript(f.read())
     
     # Quick migration for existing databases
-    try:
-        conn.execute("ALTER TABLE transactions ADD COLUMN risk_reasons TEXT")
-    except sqlite3.OperationalError:
-        pass # Column already exists
-        
-    try:
-        conn.execute("ALTER TABLE users ADD COLUMN public_key TEXT")
-    except sqlite3.OperationalError:
-        pass
-        
-    try:
-        conn.execute("ALTER TABLE transactions ADD COLUMN idempotency_key TEXT")
-    except sqlite3.OperationalError:
-        pass
-
-    try:
-        conn.execute("ALTER TABLE transactions ADD COLUMN signature TEXT")
-    except sqlite3.OperationalError:
-        pass
+    migrations = [
+        "ALTER TABLE transactions ADD COLUMN risk_reasons TEXT",
+        "ALTER TABLE users ADD COLUMN public_key TEXT",
+        "ALTER TABLE transactions ADD COLUMN idempotency_key TEXT",
+        "ALTER TABLE transactions ADD COLUMN signature TEXT",
+        "ALTER TABLE users ADD COLUMN profile_type TEXT DEFAULT 'individual'",
+        "ALTER TABLE users ADD COLUMN occupation TEXT",
+        "ALTER TABLE users ADD COLUMN monthly_income REAL DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN business_name TEXT",
+        "ALTER TABLE credit_scores ADD COLUMN profile_bonus REAL DEFAULT 0",
+        """CREATE TABLE IF NOT EXISTS fraud_reports (
+            id TEXT PRIMARY KEY,
+            reporter_id TEXT NOT NULL,
+            reported_id TEXT NOT NULL,
+            transaction_id TEXT,
+            reason TEXT NOT NULL,
+            details TEXT,
+            status TEXT DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )"""
+    ]
+    for sql in migrations:
+        try:
+            conn.execute(sql)
+        except sqlite3.OperationalError:
+            pass  # Column already exists
         
     conn.commit()
     conn.close()
 
 
 def seed_demo_data():
-    """Seed demo data for hackathon demonstration."""
+    """Seed demo data for hackathon demonstration with diverse TrustScore profiles."""
     conn = get_db()
     cursor = conn.cursor()
 
@@ -67,36 +74,65 @@ def seed_demo_data():
             'name': 'Alice Johnson',
             'phone': '5551001',
             'pin': '1234',
-            'balance': 5000.00,
+            'balance': 800.00,
             'is_vendor': 0,
-            'created_at': (now - datetime.timedelta(days=10)).isoformat()
+            'profile_type': 'student',
+            'occupation': 'College Student — Part-time Barista',
+            'monthly_income': 450.00,
+            'business_name': None,
+            'created_at': (now - datetime.timedelta(days=14)).isoformat()
         },
         {
             'id': 'USR-002',
             'name': 'Bob Smith',
             'phone': '5551002',
             'pin': '5678',
-            'balance': 3000.00,
+            'balance': 3200.00,
             'is_vendor': 0,
-            'created_at': (now - datetime.timedelta(days=5)).isoformat()
+            'profile_type': 'freelancer',
+            'occupation': 'Freelance Software Developer',
+            'monthly_income': 2800.00,
+            'business_name': None,
+            'created_at': (now - datetime.timedelta(days=45)).isoformat()
         },
         {
             'id': 'USR-003',
             'name': "Charlie's Coffee",
             'phone': '5551003',
             'pin': '9999',
-            'balance': 10000.00,
+            'balance': 25000.00,
             'is_vendor': 1,
-            'created_at': (now - datetime.timedelta(days=30)).isoformat()
+            'profile_type': 'vendor',
+            'occupation': 'Coffee Shop Owner',
+            'monthly_income': 8500.00,
+            'business_name': "Charlie's Coffee House",
+            'created_at': (now - datetime.timedelta(days=120)).isoformat()
         },
         {
             'id': 'USR-004',
-            'name': 'David HighCredit',
+            'name': 'David Park',
             'phone': '5551004',
             'pin': '4321',
-            'balance': 15000.00,
+            'balance': 18000.00,
             'is_vendor': 0,
+            'profile_type': 'businessman',
+            'occupation': 'CEO & Founder',
+            'monthly_income': 12000.00,
+            'business_name': "Park Tech Solutions LLC",
             'created_at': (now - datetime.timedelta(days=180)).isoformat()
+        },
+        {
+            'id': 'USR-005',
+            'name': 'Elena Rodriguez',
+            'phone': '5551005',
+            'pin': '1111',
+            'balance': 1200.00,
+            'is_vendor': 0,
+            'profile_type': 'student',
+            'occupation': 'Graduate Student — Research Assistant',
+            'monthly_income': 1800.00,
+            'business_name': None,
+            'created_at': (now - datetime.timedelta(days=60)).isoformat()
         }
     ]
 
@@ -104,55 +140,99 @@ def seed_demo_data():
         pin_hash = bcrypt.hashpw(user['pin'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         qr_data = f"meshbank://pay/{user['id']}"
         cursor.execute(
-            "INSERT INTO users (id, name, phone, pin_hash, balance, is_vendor, qr_data, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            (user['id'], user['name'], user['phone'], pin_hash, user['balance'], user['is_vendor'], qr_data, user['created_at'])
+            """INSERT INTO users (id, name, phone, pin_hash, balance, is_vendor, profile_type, occupation, monthly_income, business_name, qr_data, created_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (user['id'], user['name'], user['phone'], pin_hash, user['balance'], user['is_vendor'],
+             user['profile_type'], user['occupation'], user['monthly_income'], user['business_name'],
+             qr_data, user['created_at'])
         )
 
-    # Seed transactions for Alice (10 days) and Bob (5 days)
+    # ---- Transaction Histories ----
     demo_txns = []
-    
-    # Alice spends $20 daily over the last 9 days
+
+    # Alice (Student) — small, sporadic purchases over 12 days
     for i in range(1, 10):
         demo_txns.append({
             'sender_id': 'USR-001',
             'receiver_id': 'USR-003',
-            'amount': 20.00 + i,
+            'amount': 5.00 + (i % 4),
             'type': 'vendor',
-            'note': 'Coffee order',
-            'created_at': (now - datetime.timedelta(days=i, hours=2)).isoformat()
+            'note': 'Coffee & snack',
+            'created_at': (now - datetime.timedelta(days=i, hours=8)).isoformat()
         })
-        
-    # Bob spends $50 daily over the last 4 days
-    for i in range(1, 5):
+
+    # Bob (Freelancer) — irregular but larger payments, some p2p
+    for i in [2, 5, 8, 14, 20, 28]:
         demo_txns.append({
             'sender_id': 'USR-002',
             'receiver_id': 'USR-003',
-            'amount': 50.00 + i,
+            'amount': 35.00 + (i * 2),
             'type': 'vendor',
-            'note': 'Lunch',
-            'created_at': (now - datetime.timedelta(days=i, hours=5)).isoformat()
+            'note': 'Working lunch',
+            'created_at': (now - datetime.timedelta(days=i, hours=12)).isoformat()
         })
-        
-    # Alice sends Bob some money mutually
-    demo_txns.append({
-            'sender_id': 'USR-001',
+    # Bob receives freelance payments
+    for i in [3, 10, 18, 25]:
+        demo_txns.append({
+            'sender_id': 'USR-004',
             'receiver_id': 'USR-002',
-            'amount': 150.00,
+            'amount': 500.00 + (i * 10),
             'type': 'p2p',
-            'note': 'Owe you for dinner',
-            'created_at': (now - datetime.timedelta(days=2, hours=10)).isoformat()
-    })
+            'note': 'Contract payment',
+            'created_at': (now - datetime.timedelta(days=i, hours=14)).isoformat()
+        })
 
-    # David pays Charlie consistently for the last 15 days (High Credit score generation)
-    for i in range(1, 16):
+    # David (Businessman) — high-volume, consistent daily transactions
+    for i in range(1, 25):
         demo_txns.append({
             'sender_id': 'USR-004',
             'receiver_id': 'USR-003',
-            'amount': 15.00,
+            'amount': 25.00 + (i % 5) * 5,
             'type': 'vendor',
-            'note': 'Daily supplies',
-            'created_at': (now - datetime.timedelta(days=i, hours=8)).isoformat()
+            'note': 'Team lunch / supplies',
+            'created_at': (now - datetime.timedelta(days=i, hours=12)).isoformat()
         })
+    # David also does p2p regularly
+    for i in range(1, 10):
+        demo_txns.append({
+            'sender_id': 'USR-004',
+            'receiver_id': 'USR-001',
+            'amount': 50.00,
+            'type': 'p2p',
+            'note': 'Internship stipend',
+            'created_at': (now - datetime.timedelta(days=i*3, hours=9)).isoformat()
+        })
+
+    # Elena (Grad Student) — very consistent small daily transactions
+    for i in range(1, 30):
+        demo_txns.append({
+            'sender_id': 'USR-005',
+            'receiver_id': 'USR-003',
+            'amount': 8.00,
+            'type': 'vendor',
+            'note': 'Daily coffee',
+            'created_at': (now - datetime.timedelta(days=i, hours=7)).isoformat()
+        })
+    # Elena receives monthly stipend
+    for i in [5, 35]:
+        demo_txns.append({
+            'sender_id': 'USR-004',
+            'receiver_id': 'USR-005',
+            'amount': 900.00,
+            'type': 'p2p',
+            'note': 'Research stipend',
+            'created_at': (now - datetime.timedelta(days=i, hours=10)).isoformat()
+        })
+
+    # Alice sends Bob some money
+    demo_txns.append({
+        'sender_id': 'USR-001',
+        'receiver_id': 'USR-002',
+        'amount': 25.00,
+        'type': 'p2p',
+        'note': 'Split dinner',
+        'created_at': (now - datetime.timedelta(days=2, hours=10)).isoformat()
+    })
 
     for txn in demo_txns:
         txn_id = f"TXN-{uuid.uuid4().hex[:8].upper()}"
@@ -168,7 +248,13 @@ def seed_demo_data():
                 "INSERT INTO receipts (id, transaction_id, sender_name, receiver_name, amount, type, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 (f"RCP-{uuid.uuid4().hex[:8].upper()}", txn_id, sender['name'], receiver['name'], txn['amount'], txn['type'], 'completed', txn['created_at'])
             )
+    # ---- Fraud Reports ----
+    # Alice reports Bob for 'Fake Money'
+    cursor.execute(
+        "INSERT INTO fraud_reports (id, reporter_id, reported_id, transaction_id, reason, details, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        ('FRD-001', 'USR-001', 'USR-002', None, 'Fake Money', 'Gave me a fake $20 bill at the meetup.', 'confirmed')
+    )
 
     conn.commit()
     conn.close()
-    print("✅ Demo data seeded successfully with historical ranges!")
+    print("✅ Demo data seeded with 5 TrustScore user profiles!")

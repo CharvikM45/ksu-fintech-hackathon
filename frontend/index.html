@@ -60,10 +60,11 @@
                     <div class="demo-section">
                         <p class="demo-label">DEMO ACCOUNTS</p>
                         <div class="demo-buttons">
-                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551001', '1234')">Alice (New User) • 5551001 (1234)</button>
-                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551002', '5678')">Bob (Risk User) • 5551002 (5678)</button>
-                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551004', '4321')">David (High Credit) • 5551004 (4321)</button>
-                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551003', '9999')">Charlie (Vendor) • 5551003 (9999)</button>
+                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551001', '1234')">🎓 Alice (Student) • 5551001 (1234)</button>
+                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551002', '5678')">💻 Bob (Freelancer) • 5551002 (5678)</button>
+                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551004', '4321')">🏢 David (Business Owner) • 5551004 (4321)</button>
+                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551005', '1111')">📚 Elena (Grad Student) • 5551005 (1111)</button>
+                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551003', '9999')">☕ Charlie (Vendor) • 5551003 (9999)</button>
                         </div>
                     </div>
                 </div>
@@ -487,13 +488,18 @@
             <!-- NANOCREDIT PAGE -->
             <div id="page-credit" class="page">
                 <div class="page-header">
-                    <h2 class="page-title">NanoCredit</h2>
-                    <p class="page-subtitle">Financial Identity AI & Micro-Loans</p>
+                    <h2 class="page-title">TrustScore</h2>
+                    <p class="page-subtitle">Trust-Based Financial Identity & Micro-Loans</p>
                 </div>
 
-                <!-- Credit Score Card -->
+                <!-- User Profile Card -->
+                <div class="glass-panel" id="trustscore-profile-card" style="padding:28px 24px; margin-bottom:20px;">
+                    <div style="text-align:center; color:var(--text-muted); padding:20px;">Loading profile...</div>
+                </div>
+
+                <!-- TrustScore Ring Card -->
                 <div class="glass-panel" style="text-align:center; padding:32px 24px;">
-                    <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:8px;">Financial Identity Score</div>
+                    <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:8px;">TrustScore</div>
                     <div style="position:relative; width:160px; height:160px; margin:0 auto 16px;">
                         <svg viewBox="0 0 36 36" style="transform:rotate(-90deg); width:100%; height:100%;">
                             <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"/>
@@ -509,13 +515,21 @@
                 </div>
 
                 <!-- Score Breakdown -->
-                <div class="section-title mt-4 mb-2">Score Breakdown</div>
+                <div class="section-title mt-4 mb-2">Trust Factors</div>
                 <div class="glass-panel" id="credit-breakdown">
                     <div style="text-align:center; color:var(--text-muted); padding:20px;">Loading analysis...</div>
                 </div>
 
+                <!-- Community Trust Highlights -->
+                <div class="section-title mt-4 mb-2">Community Trust Signals</div>
+                <div class="glass-panel" id="community-trust-section" style="padding:16px 20px;">
+                    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                        <div style="text-align:center; width:100%; color:var(--text-muted); padding:10px;">Building community history...</div>
+                    </div>
+                </div>
+
                 <!-- Apply for Loan -->
-                <div class="section-title mt-4 mb-2">Apply for NanoLoan</div>
+                <div class="section-title mt-4 mb-2">Apply for TrustScore Loan</div>
                 <div class="glass-panel" id="loan-apply-section">
                     <div style="text-align:center; color:var(--text-muted); padding:20px;">Calculate your score first</div>
                 </div>
@@ -550,8 +564,8 @@
                     <span>History</span>
                 </button>
                 <button class="nav-item" onclick="navigateTo('credit')" id="nav-credit">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10h20"/><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 16h2"/><path d="M12 16h6"/></svg>
-                    <span>Credit</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>Trust</span>
                 </button>
 
                 <button class="nav-item" onclick="navigateTo('ai')" id="nav-ai">
@@ -649,5 +663,45 @@
     <script src="js/qr.js"></script>
     <script src="js/assistant.js"></script>
     <script src="js/app.js"></script>
+    <!-- Report Fraud Modal -->
+    <div id="report-fraud-modal" class="modal-overlay">
+        <div class="modal-content glass-panel" style="max-width: 400px; padding: 24px;">
+            <div class="modal-handle"></div>
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div class="logo-icon small" style="margin: 0 auto 12px; font-size: 2rem; background: rgba(239, 68, 68, 0.1); border: 2px solid var(--danger); width: 60px; height: 60px; line-height: 56px;">🚩</div>
+                <h3 class="form-heading">Report Suspicious Activity</h3>
+                <p class="text-muted" style="font-size: 0.85rem;">Help keep the mesh network safe</p>
+            </div>
+
+            <input type="hidden" id="report-reported-id">
+            <input type="hidden" id="report-txn-id">
+            
+            <div class="form-group">
+                <label class="form-label">Reported User</label>
+                <div id="report-user-display" style="color: #fff; font-weight: 600; padding: 10px; background: rgba(255,255,255,0.05); border-radius: var(--radius-sm);"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Reason for Report</label>
+                <select id="report-reason" class="form-input">
+                    <option value="Fake Money">Giving Fake Money</option>
+                    <option value="Scam">Fraudulent Transaction / Scam</option>
+                    <option value="Unrecognized">Unrecognized Activity</option>
+                    <option value="Other">Other Security Concern</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Details</label>
+                <textarea id="report-details" class="form-input" placeholder="Please describe what happened..." rows="3"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button class="btn btn-secondary flex-1" onclick="closeModals()">Cancel</button>
+                <button class="btn btn-danger flex-1" onclick="submitFraudReport()">Submit Report</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

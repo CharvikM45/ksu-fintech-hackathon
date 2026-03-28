@@ -333,6 +333,8 @@ function renderTransactionList(containerId, transactions) {
     let html = '';
     for (const txn of transactions) {
         const isSent = txn.direction === 'sent';
+        const otherPartyId = isSent ? txn.receiver_id : txn.sender_id;
+        const otherPartyName = isSent ? txn.receiver_name : txn.sender_name;
         const icon = isSent ? '📤' : '📥';
         const iconClass = isSent ? 'sent' : 'received';
         const name = isSent ? txn.receiver_name : txn.sender_name;
@@ -345,13 +347,54 @@ function renderTransactionList(containerId, transactions) {
             <div class="txn-item">
                 <div class="txn-icon ${iconClass}">${icon}</div>
                 <div class="txn-details">
-                    <div class="txn-name">${name} ${riskBadge}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div class="txn-name">${name} ${riskBadge}</div>
+                        <a href="#" style="font-size:0.7rem; color:var(--danger); text-decoration:none;" onclick="openReportModal('${txn.id}', '${otherPartyId}', '${otherPartyName}')">🚩 Report</a>
+                    </div>
                     <div class="txn-meta">${txn.type} • ${formatTime(txn.created_at)} ${txn.note ? '• ' + txn.note : ''}</div>
                 </div>
                 <div class="txn-amount ${amountClass}">${sign}${formatCurrency(txn.amount)}</div>
             </div>`;
     }
     container.innerHTML = html;
+}
+
+function openReportModal(txnId, reportedId, reportedName) {
+    document.getElementById('report-txn-id').value = txnId;
+    document.getElementById('report-reported-id').value = reportedId;
+    document.getElementById('report-user-display').textContent = reportedName;
+    document.getElementById('report-reason').value = 'Fake Money';
+    document.getElementById('report-details').value = '';
+    document.getElementById('report-fraud-modal').classList.add('active');
+}
+
+async function submitFraudReport() {
+    const reportedId = document.getElementById('report-reported-id').value;
+    const txnId = document.getElementById('report-txn-id').value;
+    const reason = document.getElementById('report-reason').value;
+    const details = document.getElementById('report-details').value;
+
+    if (!reason) {
+        showToast('Please select a reason', 'error');
+        return;
+    }
+
+    try {
+        await apiCall('/api/report-fraud', {
+            method: 'POST',
+            body: JSON.stringify({
+                reporter_id: currentUser.id,
+                reported_id: reportedId,
+                transaction_id: txnId,
+                reason,
+                details
+            })
+        });
+        showToast('Report submitted. Thank you for keeping us safe!', 'success');
+        closeModals();
+    } catch (err) {
+        showToast(err.message || 'Failed to submit report', 'error');
+    }
 }
 
 async function loadTransactions() {
@@ -1022,8 +1065,10 @@ async function loadCreditPage() {
     try {
         // Load credit score
         const score = await apiCall(`/api/credit-score/${currentUser.id}`);
+        renderUserProfile(score.profile, score.trust_level, score.trust_emoji);
         renderCreditScore(score);
         renderCreditBreakdown(score);
+        renderCommunityTrust(score.community_badges);
         renderLoanApplication(score);
 
         // Load loans
@@ -1033,6 +1078,52 @@ async function loadCreditPage() {
         showToast('Failed to load credit data', 'error');
         console.error(err);
     }
+}
+
+function renderUserProfile(profile, trustLabel, trustEmoji) {
+    const container = document.getElementById('trustscore-profile-card');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div style="display:flex; align-items:center; gap:20px; margin-bottom:20px;">
+            <div style="width:64px; height:64px; background:rgba(0,214,50,0.1); border:2px solid var(--primary); border-radius:32px; display:flex; align-items:center; justify-content:center; font-size:1.8rem;">
+                ${profile.type === 'student' ? '🎓' : profile.type === 'businessman' ? '🏢' : profile.type === 'freelancer' ? '💻' : profile.type === 'vendor' ? '☕' : '👤'}
+            </div>
+            <div>
+                <h3 style="margin:0; color:#fff; font-size:1.2rem;">${profile.name}</h3>
+                <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+                    <span class="badge ${profile.type === 'businessman' ? 'badge-success' : 'badge-secondary'}" style="font-size:0.7rem;">${profile.type_label}</span>
+                    <span style="color:var(--text-muted); font-size:0.75rem;">Join Date: ${new Date(Date.now() - profile.account_age_days * 86400000).toLocaleDateString()}</span>
+                </div>
+            </div>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px;">
+            <div class="glass-panel" style="padding:12px; background:rgba(255,255,255,0.02);">
+                <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Occupation</div>
+                <div style="color:#fff; font-size:0.9rem; margin-top:4px; font-weight:500;">${profile.occupation}</div>
+            </div>
+            <div class="glass-panel" style="padding:12px; background:rgba(255,255,255,0.02);">
+                <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Monthly Income</div>
+                <div style="color:var(--primary); font-size:1rem; margin-top:4px; font-weight:700;">${formatCurrency(profile.monthly_income)}</div>
+            </div>
+            ${profile.business_name ? `
+            <div class="glass-panel" style="padding:12px; background:rgba(255,255,255,0.02); grid-column: span 2;">
+                <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Business Name</div>
+                <div style="color:#fff; font-size:0.9rem; margin-top:4px; font-weight:500;">${profile.business_name}</div>
+            </div>
+            ` : ''}
+            <div class="glass-panel" style="padding:12px; background:rgba(0,214,50,0.05); grid-column: span 2; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Identity Trust Status</div>
+                    <div style="color:#fff; font-size:1rem; margin-top:4px; font-weight:600;">${trustEmoji} ${trustLabel}</div>
+                </div>
+                <div style="text-align:right;">
+                    <span style="font-size:0.7rem; color:var(--text-muted);">Trust Multiplier</span>
+                    <div style="color:var(--primary); font-weight:700;">${profile.multiplier}x</div>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function renderCreditScore(data) {
@@ -1057,10 +1148,10 @@ function renderCreditScore(data) {
     ringEl.setAttribute('stroke', color);
 
     const labels = {
-        'excellent': 'Excellent',
-        'good': 'Good',
-        'moderate': 'Moderate Risk',
-        'high_risk': 'High Risk',
+        'excellent': 'Highly Trusted',
+        'good': 'Trusted',
+        'moderate': 'Building Trust',
+        'high_risk': 'Low Trust',
         'unscored': 'Unscored'
     };
     const badgeClasses = {
@@ -1071,14 +1162,14 @@ function renderCreditScore(data) {
         'unscored': ''
     };
     badgeEl.className = `badge ${badgeClasses[data.risk_category] || ''}`;
-    badgeEl.textContent = labels[data.risk_category] || 'Unknown';
+    badgeEl.textContent = `${data.trust_emoji} ${data.trust_level}`;
 
     if (data.max_loan_eligible > 0) {
-        eligibleEl.innerHTML = `Eligible for up to <strong style="color:var(--primary)">${formatCurrency(data.max_loan_eligible)}</strong> NanoLoan`;
+        eligibleEl.innerHTML = `Eligible for up to <strong style="color:var(--primary)">${formatCurrency(data.max_loan_eligible)}</strong> TrustScore Loan`;
     } else if (data.active_loans > 0) {
         eligibleEl.innerHTML = '<span style="color:var(--warning)">Repay current loan to unlock new credit</span>';
     } else {
-        eligibleEl.innerHTML = 'Keep transacting to build your score';
+        eligibleEl.innerHTML = 'Build trust to unlock higher limits';
     }
 }
 
@@ -1087,6 +1178,7 @@ function renderCreditBreakdown(data) {
     const bd = data.breakdown;
 
     const factors = [
+        { label: 'Profile Trust Multiplier', icon: '👤', score: bd.profile_trust.score, max: bd.profile_trust.max, detail: `${bd.profile_trust.type.toUpperCase()} (${bd.profile_trust.multiplier}x)` },
         { label: 'Account Age', icon: '📅', score: bd.account_age.score, max: bd.account_age.max, detail: `${bd.account_age.days} days old` },
         { label: 'Transaction Volume', icon: '📊', score: bd.transaction_volume.score, max: bd.transaction_volume.max, detail: `${bd.transaction_volume.count} transactions` },
         { label: 'Income Stability', icon: '💰', score: bd.income_stability.score, max: bd.income_stability.max, detail: `${(bd.income_stability.value * 100).toFixed(0)}% stable` },
@@ -1096,21 +1188,55 @@ function renderCreditBreakdown(data) {
         { label: 'Repayment Bonus', icon: '⭐', score: bd.repayment_bonus.score, max: bd.repayment_bonus.max, detail: `${bd.repayment_bonus.loans_repaid} loans repaid` }
     ];
 
+    if (data.fraud_reports > 0) {
+        factors.push({ 
+            label: 'Fraud Penalty', 
+            icon: '🚩', 
+            score: -(data.fraud_reports * 75), 
+            max: 0, 
+            detail: `${data.fraud_reports} confirmed report(s)` 
+        });
+    }
+
     container.innerHTML = factors.map(f => {
-        const pct = f.max > 0 ? (f.score / f.max * 100) : 0;
+        const pct = f.max > 0 ? (f.score / f.max * 100) : f.score < 0 ? 0 : 0;
+        const barColor = f.score < 0 ? 'var(--danger)' : pct > 70 ? 'var(--primary)' : pct > 40 ? 'var(--warning)' : 'var(--danger)';
         return `
             <div style="margin-bottom:16px;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
                     <span style="font-size:0.85rem; color:#fff;">${f.icon} ${f.label}</span>
-                    <span style="font-size:0.8rem; color:var(--text-secondary);">${f.score.toFixed(0)}/${f.max}</span>
+                    <span style="font-size:0.8rem; color:${f.score < 0 ? 'var(--danger)' : 'var(--text-secondary)'};">
+                        ${f.score < 0 ? f.score.toFixed(0) : f.score.toFixed(0) + '/' + f.max}
+                    </span>
                 </div>
                 <div style="background:rgba(255,255,255,0.05); border-radius:6px; height:8px; overflow:hidden;">
-                    <div style="height:100%; width:${pct}%; background:${pct > 70 ? 'var(--primary)' : pct > 40 ? 'var(--warning)' : 'var(--danger)'}; border-radius:6px; transition:width 1s ease;"></div>
+                    <div style="height:100%; width:${f.score < 0 ? '100%' : pct}%; background:${barColor}; border-radius:6px; transition:width 1s ease;"></div>
                 </div>
                 <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${f.detail}</div>
             </div>
         `;
     }).join('');
+}
+
+function renderCommunityTrust(badges) {
+    const container = document.getElementById('community-trust-section');
+    if (!container) return;
+
+    if (!badges || badges.length === 0) {
+        container.innerHTML = '<div style="text-align:center; width:100%; color:var(--text-muted); padding:10px;">Building community history...</div>';
+        return;
+    }
+
+    container.innerHTML = `
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            ${badges.map(b => `
+                <div class="glass-panel" style="padding:10px 14px; background:rgba(0,214,50,0.05); border:1px solid rgba(0,214,50,0.1); border-radius:var(--radius-sm); flex: 1 1 auto; min-width: 140px;">
+                    <div style="font-weight:700; color:#fff; font-size:0.85rem; margin-bottom:4px;">${b.label}</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted);">${b.desc}</div>
+                </div>
+            `).join('')}
+        </div>
+    `;
 }
 
 function renderLoanApplication(data) {
@@ -1154,7 +1280,7 @@ function renderLoanApplication(data) {
             <div style="font-size:0.8rem; color:var(--text-muted);">Interest Rate: <strong style="color:#fff;">${data.score >= 700 ? '2%' : data.score >= 500 ? '5%' : data.score >= 300 ? '8%' : '12%'}</strong></div>
             <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Repayment Period: <strong style="color:#fff;">30 days</strong></div>
         </div>
-        <button class="btn btn-primary btn-block" onclick="applyForLoan()">💳 Apply for NanoLoan</button>
+        <button class="btn btn-primary btn-block" onclick="applyForLoan()">💳 Apply for TrustScore Loan</button>
     `;
 }
 
