@@ -78,131 +78,136 @@ def transfer():
         return jsonify({'error': 'Amount must be greater than 0'}), 400
 
     conn = get_db()
-    # Use IMMEDIATE to lock the database for writing and prevent race conditions
-    conn.execute("BEGIN IMMEDIATE")
-    cursor = conn.cursor()
+    try:
+        # Use IMMEDIATE to lock the database for writing and prevent race conditions
+        conn.execute("BEGIN IMMEDIATE")
+        cursor = conn.cursor()
 
-    # Verify sender
-    cursor.execute("SELECT * FROM users WHERE id = ?", (sender_id,))
-    sender = cursor.fetchone()
-    if not sender:
-        conn.close()
-        return jsonify({'error': 'Sender not found'}), 404
+        # Verify sender
+        cursor.execute("SELECT * FROM users WHERE id = ?", (sender_id,))
+        sender = cursor.fetchone()
+        if not sender:
+            conn.rollback()
+            return jsonify({'error': 'Sender not found'}), 404
 
-    # Verify PIN
-    if not bcrypt.checkpw(pin.encode('utf-8'), sender['pin_hash'].encode('utf-8')):
-        conn.close()
-        return jsonify({'error': 'Invalid PIN'}), 401
+        # Verify PIN
+        if not bcrypt.checkpw(pin.encode('utf-8'), sender['pin_hash'].encode('utf-8')):
+            conn.rollback()
+            return jsonify({'error': 'Invalid PIN'}), 401
 
-    # Check balance
-    if sender['balance'] < amount:
-        conn.close()
-        return jsonify({'error': 'Insufficient balance'}), 400
+        # Check balance
+        if sender['balance'] < amount:
+            conn.rollback()
+            return jsonify({'error': 'Insufficient balance'}), 400
 
-    # Find receiver
-    if receiver_phone and not receiver_id:
-        cursor.execute("SELECT * FROM users WHERE phone = ?", (receiver_phone,))
-        receiver = cursor.fetchone()
-        if not receiver:
-            conn.close()
-            return jsonify({'error': 'Receiver not found'}), 404
-        receiver_id = receiver['id']
-    else:
-        cursor.execute("SELECT * FROM users WHERE id = ?", (receiver_id,))
-        receiver = cursor.fetchone()
-        if not receiver:
-            conn.close()
-            return jsonify({'error': 'Receiver not found'}), 404
+        # Find receiver
+        if receiver_phone and not receiver_id:
+            cursor.execute("SELECT * FROM users WHERE phone = ?", (receiver_phone,))
+            receiver = cursor.fetchone()
+            if not receiver:
+                conn.rollback()
+                return jsonify({'error': 'Receiver not found'}), 404
+            receiver_id = receiver['id']
+        else:
+            cursor.execute("SELECT * FROM users WHERE id = ?", (receiver_id,))
+            receiver = cursor.fetchone()
+            if not receiver:
+                conn.rollback()
+                return jsonify({'error': 'Receiver not found'}), 404
 
-    # Prevent self-transfer
-    if sender_id == receiver_id:
-        conn.close()
-        return jsonify({'error': 'Cannot transfer to yourself'}), 400
+        # Prevent self-transfer
+        if sender_id == receiver_id:
+            conn.rollback()
+            return jsonify({'error': 'Cannot transfer to yourself'}), 400
 
-    # --- Idempotency Check ---
-    if idempotency_key:
-        cursor.execute("SELECT id FROM transactions WHERE idempotency_key = ?", (idempotency_key,))
-        existing = cursor.fetchone()
-        if existing:
-            conn.close()
-            return jsonify({'error': 'Transaction already processed', 'transaction_id': existing['id']}), 409
-    else:
-        # Fallback to time-based duplicate check if no key provided
-        cursor.execute("""
-            SELECT id FROM transactions 
-            WHERE sender_id = ? AND receiver_id = ? AND amount = ? 
-            AND created_at > datetime('now', '-10 seconds')
-        """, (sender_id, receiver_id, amount))
-        if cursor.fetchone():
-            conn.close()
-            return jsonify({'error': 'Duplicate transaction detected. Please wait a moment.'}), 429
+        # --- Idempotency Check ---
+        if idempotency_key:
+            cursor.execute("SELECT id FROM transactions WHERE idempotency_key = ?", (idempotency_key,))
+            existing = cursor.fetchone()
+            if existing:
+                conn.rollback()
+                return jsonify({'error': 'Transaction already processed', 'transaction_id': existing['id']}), 409
+        else:
+            # Fallback to time-based duplicate check if no key provided
+            cursor.execute("""
+                SELECT id FROM transactions 
+                WHERE sender_id = ? AND receiver_id = ? AND amount = ? 
+                AND created_at > datetime('now', '-10 seconds')
+            """, (sender_id, receiver_id, amount))
+            if cursor.fetchone():
+                conn.rollback()
+                return jsonify({'error': 'Duplicate transaction detected. Please wait a moment.'}), 429
 
-    # --- Digital Signature Verification ---
-    if sender.get('public_key'):
-        # Data string matches client-side signing: sender_id|phone|amount|timestamp|idempotency_key
-        data_to_verify = f"{sender_id}|{receiver_phone}|{amount}|{timestamp}|{idempotency_key}"
-        if not verify_ec_signature(sender['public_key'], signature, data_to_verify):
-            conn.close()
-            return jsonify({'error': 'Invalid transaction signature. Potential tampering detected.'}), 401
+        # --- Digital Signature Verification ---
+        if 'public_key' in sender.keys() and sender['public_key']:
+            # Data string matches client-side signing: sender_id|phone|amount|timestamp|idempotency_key
+            data_to_verify = f"{sender_id}|{receiver_phone}|{amount}|{timestamp}|{idempotency_key}"
+            if not verify_ec_signature(sender['public_key'], signature, data_to_verify):
+                conn.rollback()
+                return jsonify({'error': 'Invalid transaction signature. Potential tampering detected.'}), 401
 
-    # Perform fraud check
-    from services.fraud_detection import assess_risk
-    risk_result = assess_risk(sender_id, amount, conn, receiver_id=receiver_id)
-    risk_level = risk_result['level']
+        # Perform fraud check
+        from services.fraud_detection import assess_risk
+        risk_result = assess_risk(sender_id, amount, conn, receiver_id=receiver_id)
+        risk_level = risk_result['level']
 
-    # Execute transfer
-    txn_id = f"TXN-{uuid.uuid4().hex[:8].upper()}"
-    txn_status = 'completed' if risk_level != 'high' else 'flagged'
+        # Execute transfer
+        txn_id = f"TXN-{uuid.uuid4().hex[:8].upper()}"
+        txn_status = 'completed' if risk_level != 'high' else 'flagged'
 
-    if txn_status == 'flagged':
-        conn.close()
+        if txn_status == 'flagged':
+            conn.rollback()
+            return jsonify({
+                'error': 'Transaction flagged for suspicious activity',
+                'risk_level': risk_level,
+                'risk_reasons': risk_result['reasons'],
+                'transaction_id': txn_id
+            }), 403
+
+        # Deduct and add balances
+        cursor.execute("UPDATE users SET balance = balance - ? WHERE id = ?", (amount, sender_id))
+        cursor.execute("UPDATE users SET balance = balance + ? WHERE id = ?", (amount, receiver_id))
+
+        # Record transaction
+        cursor.execute(
+            "INSERT INTO transactions (id, sender_id, receiver_id, amount, type, status, risk_level, risk_reasons, note, idempotency_key, signature) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (txn_id, sender_id, receiver_id, amount, 'p2p', txn_status, risk_level, json.dumps(risk_result['reasons']), note, idempotency_key, signature)
+        )
+
+        # Create receipt
+        receipt_id = f"RCP-{uuid.uuid4().hex[:8].upper()}"
+        cursor.execute(
+            "INSERT INTO receipts (id, transaction_id, sender_name, receiver_name, amount, type, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (receipt_id, txn_id, sender['name'], receiver['name'], amount, 'p2p', txn_status)
+        )
+
+        conn.commit()
+
+        # Get updated balances
+        cursor.execute("SELECT balance FROM users WHERE id = ?", (sender_id,))
+        new_balance = cursor.fetchone()['balance']
+        
         return jsonify({
-            'error': 'Transaction flagged for suspicious activity',
-            'risk_level': risk_level,
-            'risk_reasons': risk_result['reasons'],
-            'transaction_id': txn_id
-        }), 403
-
-    # Deduct and add balances
-    cursor.execute("UPDATE users SET balance = balance - ? WHERE id = ?", (amount, sender_id))
-    cursor.execute("UPDATE users SET balance = balance + ? WHERE id = ?", (amount, receiver_id))
-
-    # Record transaction
-    cursor.execute(
-        "INSERT INTO transactions (id, sender_id, receiver_id, amount, type, status, risk_level, risk_reasons, note, idempotency_key, signature) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        (txn_id, sender_id, receiver_id, amount, 'p2p', txn_status, risk_level, json.dumps(risk_result['reasons']), note, idempotency_key, signature)
-    )
-
-    # Create receipt
-    receipt_id = f"RCP-{uuid.uuid4().hex[:8].upper()}"
-    cursor.execute(
-        "INSERT INTO receipts (id, transaction_id, sender_name, receiver_name, amount, type, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        (receipt_id, txn_id, sender['name'], receiver['name'], amount, 'p2p', txn_status)
-    )
-
-    conn.commit()
-
-    # Get updated balances
-    cursor.execute("SELECT balance FROM users WHERE id = ?", (sender_id,))
-    new_balance = cursor.fetchone()['balance']
-    conn.close()
-
-    return jsonify({
-        'success': True,
-        'transaction': {
-            'id': txn_id,
-            'sender': sender['name'],
-            'receiver': receiver['name'],
-            'amount': amount,
-            'type': 'p2p',
-            'status': txn_status,
-            'risk_level': risk_level,
-            'note': note,
-            'receipt_id': receipt_id
-        },
-        'new_balance': new_balance,
-        'message': f'Successfully sent ${amount:.2f} to {receiver["name"]}'
-    })
+            'success': True,
+            'transaction': {
+                'id': txn_id,
+                'sender': sender['name'],
+                'receiver': receiver['name'],
+                'amount': amount,
+                'type': 'p2p',
+                'status': txn_status,
+                'risk_level': risk_level,
+                'note': note,
+                'receipt_id': receipt_id
+            },
+            'new_balance': new_balance,
+            'message': f'Successfully sent ${amount:.2f} to {receiver["name"]}'
+        })
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': 'An internal database error occurred', 'details': str(e)}), 500
+    finally:
+        conn.close()
 
 
 @wallet_bp.route('/api/transactions/<user_id>', methods=['GET'])
@@ -400,90 +405,95 @@ def respond_to_request():
         return jsonify({'error': 'Missing required fields'}), 400
 
     conn = get_db()
-    # Use IMMEDIATE to lock for writing
-    conn.execute("BEGIN IMMEDIATE")
-    cursor = conn.cursor()
+    try:
+        # Use IMMEDIATE to lock for writing
+        conn.execute("BEGIN IMMEDIATE")
+        cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM money_requests WHERE id = ? AND status = 'pending'", (request_id,))
-    req = cursor.fetchone()
-    if not req:
-        conn.close()
-        return jsonify({'error': 'Request not found or already processed'}), 404
+        cursor.execute("SELECT * FROM money_requests WHERE id = ? AND status = 'pending'", (request_id,))
+        req = cursor.fetchone()
+        if not req:
+            conn.rollback()
+            return jsonify({'error': 'Request not found or already processed'}), 404
 
-    if action == 'decline':
-        cursor.execute("UPDATE money_requests SET status = 'declined' WHERE id = ?", (request_id,))
+        if action == 'decline':
+            cursor.execute("UPDATE money_requests SET status = 'declined' WHERE id = ?", (request_id,))
+            conn.commit()
+            return jsonify({'success': True, 'message': 'Request declined'})
+
+        # action == 'pay'
+        if not pin:
+            conn.rollback()
+            return jsonify({'error': 'PIN required to pay'}), 400
+
+        cursor.execute("SELECT * FROM users WHERE id = ?", (payer_id,))
+        payer = cursor.fetchone()
+        if not payer:
+            conn.rollback()
+            return jsonify({'error': 'Payer not found'}), 404
+
+        if not bcrypt.checkpw(pin.encode('utf-8'), payer['pin_hash'].encode('utf-8')):
+            conn.rollback()
+            return jsonify({'error': 'Invalid PIN'}), 401
+
+        # --- Idempotency Check ---
+        if idempotency_key:
+            cursor.execute("SELECT id FROM transactions WHERE idempotency_key = ?", (idempotency_key,))
+            existing = cursor.fetchone()
+            if existing:
+                conn.rollback()
+                return jsonify({'error': 'Transaction already processed', 'transaction_id': existing['id']}), 409
+
+        # --- Digital Signature Verification ---
+        if 'public_key' in payer.keys() and payer['public_key']:
+            # Data string matches client-side signing: payer_id||amount|timestamp|idempotency_key
+            amount_str = f"{req['amount']:g}"
+            data_to_verify = f"{payer_id}||{amount_str}|{timestamp}|{idempotency_key}"
+            if not verify_ec_signature(payer['public_key'], signature, data_to_verify):
+                conn.rollback()
+                return jsonify({'error': 'Invalid transaction signature. Potential tampering detected.'}), 401
+
+        amount = req['amount']
+        receiver_id = req['requester_id']
+
+        if payer['balance'] < amount:
+            conn.rollback()
+            return jsonify({'error': 'Insufficient balance'}), 400
+
+        # Fraud check
+        from services.fraud_detection import assess_risk
+        risk_result = assess_risk(payer_id, amount, conn, receiver_id=receiver_id)
+        risk_level = risk_result['level']
+
+        if risk_level == 'high':
+            conn.rollback()
+            return jsonify({
+                'error': 'Transaction flagged for suspicious activity',
+                'risk_level': risk_level,
+                'risk_reasons': risk_result['reasons']
+            }), 403
+
+        cursor.execute("UPDATE users SET balance = balance - ? WHERE id = ?", (amount, payer_id))
+        cursor.execute("UPDATE users SET balance = balance + ? WHERE id = ?", (amount, receiver_id))
+
+        txn_id = f"TXN-{uuid.uuid4().hex[:8].upper()}"
+        cursor.execute(
+            "INSERT INTO transactions (id, sender_id, receiver_id, amount, type, status, risk_level, risk_reasons, note, idempotency_key, signature) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (txn_id, payer_id, receiver_id, amount, 'p2p', 'completed', risk_level, json.dumps(risk_result['reasons']), f'Fulfilled request {request_id}', idempotency_key, signature)
+        )
+        cursor.execute("UPDATE money_requests SET status = 'completed' WHERE id = ?", (request_id,))
         conn.commit()
-        conn.close()
-        return jsonify({'success': True, 'message': 'Request declined'})
 
-    # action == 'pay'
-    if not pin:
-        conn.close()
-        return jsonify({'error': 'PIN required to pay'}), 400
-
-    cursor.execute("SELECT * FROM users WHERE id = ?", (payer_id,))
-    payer = cursor.fetchone()
-    if not payer:
-        conn.close()
-        return jsonify({'error': 'Payer not found'}), 404
-
-    if not bcrypt.checkpw(pin.encode('utf-8'), payer['pin_hash'].encode('utf-8')):
-        conn.close()
-        return jsonify({'error': 'Invalid PIN'}), 401
-
-    # --- Idempotency Check ---
-    if idempotency_key:
-        cursor.execute("SELECT id FROM transactions WHERE idempotency_key = ?", (idempotency_key,))
-        existing = cursor.fetchone()
-        if existing:
-            conn.close()
-            return jsonify({'error': 'Transaction already processed', 'transaction_id': existing['id']}), 409
-
-    # --- Digital Signature Verification ---
-    if payer.get('public_key'):
-        # Data string matches client-side signing: payer_id|amount|timestamp|idempotency_key
-        data_to_verify = f"{payer_id}|{req['amount']}|{timestamp}|{idempotency_key}"
-        if not verify_ec_signature(payer['public_key'], signature, data_to_verify):
-            conn.close()
-            return jsonify({'error': 'Invalid transaction signature. Potential tampering detected.'}), 401
-
-    amount = req['amount']
-    receiver_id = req['requester_id']
-
-    if payer['balance'] < amount:
-        conn.close()
-        return jsonify({'error': 'Insufficient balance'}), 400
-
-    # Fraud check
-    from services.fraud_detection import assess_risk
-    risk_result = assess_risk(payer_id, amount, conn, receiver_id=receiver_id)
-    risk_level = risk_result['level']
-
-    if risk_level == 'high':
-        conn.close()
+        cursor.execute("SELECT balance FROM users WHERE id = ?", (payer_id,))
+        new_balance = cursor.fetchone()['balance']
+        
         return jsonify({
-            'error': 'Transaction flagged for suspicious activity',
-            'risk_level': risk_level,
-            'risk_reasons': risk_result['reasons']
-        }), 403
-
-    cursor.execute("UPDATE users SET balance = balance - ? WHERE id = ?", (amount, payer_id))
-    cursor.execute("UPDATE users SET balance = balance + ? WHERE id = ?", (amount, receiver_id))
-
-    txn_id = f"TXN-{uuid.uuid4().hex[:8].upper()}"
-    cursor.execute(
-        "INSERT INTO transactions (id, sender_id, receiver_id, amount, type, status, risk_level, risk_reasons, note, idempotency_key, signature) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        (txn_id, payer_id, receiver_id, amount, 'p2p', 'completed', risk_level, json.dumps(risk_result['reasons']), f'Fulfilled request {request_id}', idempotency_key, signature)
-    )
-    cursor.execute("UPDATE money_requests SET status = 'completed' WHERE id = ?", (request_id,))
-    conn.commit()
-
-    cursor.execute("SELECT balance FROM users WHERE id = ?", (payer_id,))
-    new_balance = cursor.fetchone()['balance']
-    conn.close()
-
-    return jsonify({
-        'success': True,
-        'new_balance': new_balance,
-        'message': f'Paid ${amount:.2f} successfully'
-    })
+            'success': True,
+            'new_balance': new_balance,
+            'message': f'Paid ${amount:.2f} successfully'
+        })
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': 'An internal database error occurred', 'details': str(e)}), 500
+    finally:
+        conn.close()

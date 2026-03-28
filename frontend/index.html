@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="MeshBank - Offline Microbank & POS Network">
+    <meta name="description" content="Bankify - Offline Microbank & POS Network">
     <meta name="theme-color" content="#030407">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>MeshBank — Offline Microbank</title>
+    <title>Bankify — Offline Microbank</title>
     <!-- Premium Google Fonts: Outfit for Display, Inter for Body -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +29,7 @@
                 <div class="hero-content">
                     <div class="hero-logo">
                         <div class="logo-icon-large">🏦</div>
-                        <h1>MeshBank</h1>
+                        <h1>Bankify</h1>
                     </div>
                     <p class="hero-tagline">Banking for the disconnected world.</p>
                     <p class="hero-desc">Experience seamless offline microbanking and peer-to-peer transactions even without internet access. Powered by secure, local mesh networks.</p>
@@ -60,9 +60,10 @@
                     <div class="demo-section">
                         <p class="demo-label">DEMO ACCOUNTS</p>
                         <div class="demo-buttons">
-                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551001', '1234')">Alice (10-day User) • 5551001 (1234)</button>
-                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551002', '5678')">Bob (5-day User) • 5551002 (5678)</button>
-                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551003', '9999')">Charlie (Mock Vendor) • 5551003 (9999)</button>
+                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551001', '1234')">Alice (New User) • 5551001 (1234)</button>
+                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551002', '5678')">Bob (Risk User) • 5551002 (5678)</button>
+                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551004', '4321')">David (High Credit) • 5551004 (4321)</button>
+                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551003', '9999')">Charlie (Vendor) • 5551003 (9999)</button>
                         </div>
                     </div>
                 </div>
@@ -103,7 +104,7 @@
         <header class="app-header glass-panel flat-bottom">
             <div class="logo">
                 <div class="logo-icon small">🏦</div>
-                <span class="logo-text">MeshBank</span>
+                <span class="logo-text">Bankify</span>
             </div>
             <div class="header-actions" style="display: flex; align-items: center; gap: 12px;">
                 <div id="header-balance" class="header-balance-chip" style="background: rgba(0, 214, 50, 0.1); border: 1px solid rgba(0, 214, 50, 0.3); padding: 4px 10px; border-radius: 12px; font-weight: 600; color: var(--primary); font-size: 0.9rem;">$0.00</div>
@@ -400,7 +401,7 @@
                             <div class="chat-bubble bot">
                                 <div class="bubble-content">
                                     <strong class="text-white">MeshBot</strong><br>
-                                    Hello! Ask me about your balance, transactions, or how to use MeshBank.
+                                    Hello! Ask me about your balance, transactions, or how to use Bankify.
                                 </div>
                             </div>
                         </div>
@@ -483,6 +484,52 @@
                 </button>
             </div>
 
+            <!-- NANOCREDIT PAGE -->
+            <div id="page-credit" class="page">
+                <div class="page-header">
+                    <h2 class="page-title">NanoCredit</h2>
+                    <p class="page-subtitle">Financial Identity AI & Micro-Loans</p>
+                </div>
+
+                <!-- Credit Score Card -->
+                <div class="glass-panel" style="text-align:center; padding:32px 24px;">
+                    <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:8px;">Financial Identity Score</div>
+                    <div style="position:relative; width:160px; height:160px; margin:0 auto 16px;">
+                        <svg viewBox="0 0 36 36" style="transform:rotate(-90deg); width:100%; height:100%;">
+                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"/>
+                            <path id="credit-score-ring" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--primary)" stroke-width="3" stroke-dasharray="0, 100" stroke-linecap="round" style="transition: stroke-dasharray 1.5s ease, stroke 0.5s ease;"/>
+                        </svg>
+                        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;">
+                            <div id="credit-score-value" style="font-size:2.5rem; font-weight:800; color:#fff; line-height:1;">--</div>
+                            <div style="font-size:0.7rem; color:var(--text-muted);">/ 850</div>
+                        </div>
+                    </div>
+                    <div id="credit-risk-badge" class="badge" style="font-size:0.85rem; padding:6px 16px;">Analyzing...</div>
+                    <div id="credit-eligible-amount" style="margin-top:12px; font-size:0.85rem; color:var(--text-secondary);"></div>
+                </div>
+
+                <!-- Score Breakdown -->
+                <div class="section-title mt-4 mb-2">Score Breakdown</div>
+                <div class="glass-panel" id="credit-breakdown">
+                    <div style="text-align:center; color:var(--text-muted); padding:20px;">Loading analysis...</div>
+                </div>
+
+                <!-- Apply for Loan -->
+                <div class="section-title mt-4 mb-2">Apply for NanoLoan</div>
+                <div class="glass-panel" id="loan-apply-section">
+                    <div style="text-align:center; color:var(--text-muted); padding:20px;">Calculate your score first</div>
+                </div>
+
+                <!-- Active Loans -->
+                <div class="section-title mt-4 mb-2">My Loans</div>
+                <div class="glass-panel" id="credit-loans-list">
+                    <div style="text-align:center; color:var(--text-muted); padding:20px;">No loans yet</div>
+                </div>
+            </div>
+
+
+        </main>
+
         <!-- Dynamic Navigation Dock -->
         <div class="dock-wrapper">
             <nav class="dock" id="bottom-nav">
@@ -502,6 +549,11 @@
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
                     <span>History</span>
                 </button>
+                <button class="nav-item" onclick="navigateTo('credit')" id="nav-credit">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10h20"/><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 16h2"/><path d="M12 16h6"/></svg>
+                    <span>Credit</span>
+                </button>
+
                 <button class="nav-item" onclick="navigateTo('ai')" id="nav-ai">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
                     <span>AI</span>
@@ -561,6 +613,35 @@
                 <div id="success-receipt" class="receipt-box mb-4"></div>
                 <button class="btn btn-primary btn-block" onclick="closeModals(); refreshDashboard();">Done</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Fraud Detail Modal -->
+    <div id="fraud-detail-modal" class="modal-overlay">
+        <div class="modal-content glass-panel" style="max-width: 400px; padding: 24px;">
+            <div class="modal-handle"></div>
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div class="logo-icon small" style="margin: 0 auto 12px; font-size: 2rem; background: rgba(239, 68, 68, 0.15); border: 2px solid var(--danger); width: 60px; height: 60px; line-height: 56px;">🛡️</div>
+                <h3 class="form-heading" style="color: var(--danger);">Security Warning</h3>
+                <p class="text-muted" style="font-size: 0.85rem;">This transaction triggered anomaly detection</p>
+            </div>
+            
+            <div class="card" style="margin-bottom: 20px;">
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border-subtle);padding-bottom:12px;margin-bottom:12px;">
+                    <span class="text-muted">Transaction ID</span>
+                    <span id="fraud-modal-id" style="font-family: var(--font-mono); font-size: 0.85rem; color: #fff;"></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                    <span class="text-muted">Amount</span>
+                    <span id="fraud-modal-amount" style="font-weight: 700; color: var(--danger);"></span>
+                </div>
+            </div>
+
+            <h4 class="section-title mb-2">Risk Factors</h4>
+            <div id="fraud-modal-reasons" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 24px; padding: 16px; background: rgba(239,68,68,0.05); border-left: 3px solid var(--danger); border-radius: var(--radius-sm);">
+            </div>
+
+            <button class="btn btn-secondary btn-block" onclick="closeModals()">Acknowledge</button>
         </div>
     </div>
 

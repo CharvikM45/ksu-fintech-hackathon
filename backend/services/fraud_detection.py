@@ -40,7 +40,10 @@ def assess_risk(user_id, amount, conn, receiver_id=None):
 
     if stats['total'] and stats['total'] > 2:
         avg = stats['avg_amount']
-        if amount > avg * 5:
+        if amount > avg * 10:
+            risk_score += 70
+            reasons.append(f'Amount is {amount/avg:.1f}x your average — massively anomalous')
+        elif amount > avg * 5:
             risk_score += 35
             reasons.append(f'Amount is {amount/avg:.1f}x your average — highly unusual')
         elif amount > avg * 3:

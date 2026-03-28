@@ -29,6 +29,21 @@ def init_db():
     except sqlite3.OperationalError:
         pass # Column already exists
         
+    try:
+        conn.execute("ALTER TABLE users ADD COLUMN public_key TEXT")
+    except sqlite3.OperationalError:
+        pass
+        
+    try:
+        conn.execute("ALTER TABLE transactions ADD COLUMN idempotency_key TEXT")
+    except sqlite3.OperationalError:
+        pass
+
+    try:
+        conn.execute("ALTER TABLE transactions ADD COLUMN signature TEXT")
+    except sqlite3.OperationalError:
+        pass
+        
     conn.commit()
     conn.close()
 
@@ -73,6 +88,15 @@ def seed_demo_data():
             'balance': 10000.00,
             'is_vendor': 1,
             'created_at': (now - datetime.timedelta(days=30)).isoformat()
+        },
+        {
+            'id': 'USR-004',
+            'name': 'David HighCredit',
+            'phone': '5551004',
+            'pin': '4321',
+            'balance': 15000.00,
+            'is_vendor': 0,
+            'created_at': (now - datetime.timedelta(days=180)).isoformat()
         }
     ]
 
@@ -118,6 +142,17 @@ def seed_demo_data():
             'note': 'Owe you for dinner',
             'created_at': (now - datetime.timedelta(days=2, hours=10)).isoformat()
     })
+
+    # David pays Charlie consistently for the last 15 days (High Credit score generation)
+    for i in range(1, 16):
+        demo_txns.append({
+            'sender_id': 'USR-004',
+            'receiver_id': 'USR-003',
+            'amount': 15.00,
+            'type': 'vendor',
+            'note': 'Daily supplies',
+            'created_at': (now - datetime.timedelta(days=i, hours=8)).isoformat()
+        })
 
     for txn in demo_txns:
         txn_id = f"TXN-{uuid.uuid4().hex[:8].upper()}"

@@ -89,13 +89,13 @@ def predict_balance(user_id, conn):
             })
 
         if days_until_zero <= 3:
-            message = f"⚠️ At your current spending rate, you may run out of balance in {days_until_zero} day(s)!"
+            message = f"⚠️ At your current spending rate, you may run out of balance in {days_until_zero} day(s)! We highly suggest immediately halting non-essential transfers."
             confidence = 'medium'
         elif days_until_zero <= 7:
-            message = f"📉 At this pace, your balance may last about {days_until_zero} more days."
+            message = f"📉 At this pace, your balance may last about {days_until_zero} more days. Consider lowering your daily spending by 20% to extend your runtime."
             confidence = 'medium'
         elif days_until_zero <= 30:
-            message = f"📊 Your balance should last approximately {days_until_zero} days at current spending rates."
+            message = f"📊 Your balance should last approximately {days_until_zero} days at current rates. Try tracking your vendor purchases to stabilize your net flow."
             confidence = 'low'
         else:
             message = f"✅ Your balance looks healthy! Estimated to last {days_until_zero}+ days."

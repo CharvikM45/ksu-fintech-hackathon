@@ -1,5 +1,5 @@
 """
-MeshBank: Offline Microbank & POS Network
+Bankify: Offline Microbank & POS Network
 Flask Application Entry Point
 """
 import os
@@ -16,6 +16,7 @@ from routes.wallet import wallet_bp
 from routes.vendor import vendor_bp
 from routes.sync import sync_bp
 from routes.ai import ai_bp
+from routes.credit import credit_bp
 
 app = Flask(__name__,
             static_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'frontend'),
@@ -29,6 +30,7 @@ app.register_blueprint(wallet_bp)
 app.register_blueprint(vendor_bp)
 app.register_blueprint(sync_bp)
 app.register_blueprint(ai_bp)
+app.register_blueprint(credit_bp)
 
 
 @app.route('/')
@@ -46,7 +48,7 @@ def serve_static(path):
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint."""
-    return {'status': 'ok', 'service': 'MeshBank', 'version': '1.0.0'}
+    return {'status': 'ok', 'service': 'Bankify', 'version': '1.0.0'}
 
 
 @app.route('/api/demo/reset', methods=['POST'])
@@ -55,6 +57,9 @@ def reset_demo():
     from models.database import get_db
     conn = get_db()
     cursor = conn.cursor()
+    cursor.execute("DELETE FROM loans")
+    cursor.execute("DELETE FROM credit_scores")
+    cursor.execute("DELETE FROM money_requests")
     cursor.execute("DELETE FROM receipts")
     cursor.execute("DELETE FROM payment_requests")
     cursor.execute("DELETE FROM transactions")
@@ -84,7 +89,7 @@ if __name__ == '__main__':
 
     print("""
     ╔══════════════════════════════════════════╗
-    ║        🏦 MeshBank Server v1.0           ║
+    ║        🏦 Bankify Server v1.0            ║
     ║    Offline Microbank & POS Network       ║
     ╠══════════════════════════════════════════╣
     ║  Local:   http://localhost:5001           ║
@@ -93,6 +98,7 @@ if __name__ == '__main__':
     ║  Demo accounts seeded:                   ║
     ║  • Alice  (5551001) PIN: 1234            ║
     ║  • Bob    (5551002) PIN: 5678            ║
+    ║  • David  (5551004) PIN: 4321            ║
     ║  • Charlie's Coffee (5551003) PIN: 9999  ║
     ╚══════════════════════════════════════════╝
     """)
