@@ -160,9 +160,9 @@
         align-items: center;
         justify-content: center;
         margin: 0 auto 1.75rem;
-        font-size: 1.4rem;
         box-shadow: 0 2px 12px rgba(0,0,0,0.04);
         transition: border-color 0.3s, box-shadow 0.3s;
+        color: var(--icon-color, #3B2F2B);
     }
 
     .step:hover .step-icon {
@@ -229,8 +229,8 @@
         height: 3rem;
         background: rgba(13,122,111,0.08);
         border-radius: var(--radius-md);
-        font-size: 1.4rem;
         margin-bottom: 1.5rem;
+        color: #3B2F2B;
     }
 
     .feature-text h2 {
@@ -324,7 +324,7 @@
         </h1>
 
         <p class="hero-subtitle fade-up delay-200">
-            Bankify gives communities reliable, secure financial rails — P2P transfers, merchant POS, and real-time ledger sync — even when there's no internet in sight.
+            Bankify is a $35 Raspberry Pi-powered microbank that gives communities P2P transfers, merchant POS, and AI fraud detection — all completely offline.
         </p>
 
         <div class="hero-ctas fade-up delay-300">
@@ -343,7 +343,7 @@
 <section class="section bg-dark">
     <div class="container">
         <div class="text-center" style="margin-bottom: 4rem;">
-            <span class="section-label section-label-dark fade-up">The Problem</span>
+            <span class="section-label section-label-dark fade-up">Expected Impact</span>
             <h2 class="fade-up delay-100" style="font-size: clamp(2rem, 3.5vw, 3rem); max-width: 600px; margin: 0 auto;">
                 Financial exclusion is a systems problem.
             </h2>
@@ -351,16 +351,16 @@
 
         <div class="stats-grid">
             <div class="fade-up delay-100">
-                <div class="stat-number" data-target="1.4" data-suffix="B">0</div>
-                <div class="stat-label">People worldwide with no access to formal banking</div>
+                <div class="stat-number" data-target="1000" data-suffix="+">0</div>
+                <div class="stat-label">Users protected in the first year of deployment</div>
             </div>
             <div class="fade-up delay-200">
-                <div class="stat-number" data-target="72" data-suffix="%">0</div>
-                <div class="stat-label">Of mobile payment failures traced to poor connectivity</div>
+                <div class="stat-number" data-target="25" data-suffix="K+">0</div>
+                <div class="stat-label">Dollars in fraud prevented through on-device AI detection</div>
             </div>
             <div class="fade-up delay-300">
-                <div class="stat-number" data-target="0" data-suffix="ms">0</div>
-                <div class="stat-label">Downtime tolerance — Bankify processes transactions locally, always</div>
+                <div class="stat-number" data-target="40" data-suffix="%+">0</div>
+                <div class="stat-label">Increase in user confidence and community trust</div>
             </div>
         </div>
     </div>
@@ -380,37 +380,41 @@
             <div class="step fade-up delay-100">
                 <div class="step-icon">
                     <span class="step-num">1</span>
-                    📱
+                    <!-- Network icon (Raspberry Pi creates the local bank network) -->
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 5h4c0-2 2-3 2-5a4 4 0 0 0-4-4z"/><path d="M10 17v1a2 2 0 1 0 4 0v-1"/><path d="M8.5 11h7"/><circle cx="3" cy="12" r="1"/><circle cx="21" cy="12" r="1"/><path d="M4 12h4"/><path d="M16 12h4"/></svg>
                 </div>
-                <h3 class="step-title">Initiate Offline</h3>
-                <p class="step-desc">Users open a P2P transfer or POS checkout entirely within the Bankify app — no signal needed.</p>
+                <h3 class="step-title">Network</h3>
+                <p class="step-desc">A $35 Raspberry Pi broadcasts a local Wi-Fi hotspot, creating a sovereign microbank — no internet required.</p>
             </div>
 
             <div class="step fade-up delay-200">
                 <div class="step-icon">
                     <span class="step-num">2</span>
-                    🔐
+                    <!-- Transactions icon -->
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
                 </div>
-                <h3 class="step-title">Sign & Store</h3>
-                <p class="step-desc">Transactions are cryptographically signed and written to the local tamper-proof ledger.</p>
+                <h3 class="step-title">Transactions</h3>
+                <p class="step-desc">Users make real community transactions — P2P transfers, POS payments — through a standard smartphone browser.</p>
             </div>
 
             <div class="step fade-up delay-300">
                 <div class="step-icon">
                     <span class="step-num">3</span>
-                    🔄
+                    <!-- TrustScore icon -->
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
                 </div>
-                <h3 class="step-title">Mesh Sync</h3>
-                <p class="step-desc">Devices broadcast deltas peer-to-peer or queue for cloud sync when connectivity returns.</p>
+                <h3 class="step-title">TrustScore</h3>
+                <p class="step-desc">Community trust builds the TrustScore — a reputation metric derived from consistent, verified local activity.</p>
             </div>
 
             <div class="step fade-up delay-400">
                 <div class="step-icon">
                     <span class="step-num">4</span>
-                    ✅
+                    <!-- Fair Credit icon -->
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><path d="M6 15h4"/><path d="M14 15h4"/></svg>
                 </div>
-                <h3 class="step-title">Settle & Verify</h3>
-                <p class="step-desc">The central ledger reconciles every queued transaction — no double-spend, no data loss.</p>
+                <h3 class="step-title">Fair Credit</h3>
+                <p class="step-desc">A better TrustScore unlocks fairer credit through microfinance partnerships — true financial inclusion.</p>
             </div>
         </div>
     </div>
@@ -423,29 +427,50 @@
 
         <div class="feature-row fade-up delay-100">
             <div class="feature-text">
-                <div class="feature-icon-wrap">🛡️</div>
-                <h2>Military-Grade Offline Security</h2>
-                <p>Every transaction is hash-chained and signed with Ed25519 elliptic curve cryptography before it ever touches the local ledger. Even if the device is seized, the data is cryptographically useless without the user's private key.</p>
+                <div class="feature-icon-wrap">
+                    <!-- Shield/lock icon -->
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+                </div>
+                <h2>Bank-Grade Offline Security</h2>
+                <p>Every transaction is hash-chained and signed with secp256r1 ECDSA cryptography — the same math used in Bitcoin. Database-level locking with cryptographic UUIDs prevents double-spending even at the millisecond level.</p>
             </div>
             <div class="feature-visual">[ Security Architecture ]</div>
         </div>
 
         <div class="feature-row fade-up">
             <div class="feature-text">
-                <div class="feature-icon-wrap">🏪</div>
+                <div class="feature-icon-wrap">
+                    <!-- Storefront/POS icon -->
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </div>
                 <h2>Vendor POS Mode</h2>
-                <p>Merchants get a dedicated point-of-sale interface optimized for high-throughput, offline environments. Accept payments, issue receipts, and reconcile end-of-day totals — no bank terminal or internet required.</p>
+                <p>Merchants get a dedicated point-of-sale interface that generates offline QR codes for instant payment. Accept payments, issue receipts, and reconcile totals — bypassing expensive card fees and the internet entirely.</p>
             </div>
             <div class="feature-visual">[ POS Interface Mockup ]</div>
         </div>
 
         <div class="feature-row fade-up delay-100">
             <div class="feature-text">
-                <div class="feature-icon-wrap">🤖</div>
-                <h2>Lightweight AI Assistant</h2>
-                <p>An on-device financial assistant provides spending insights, flags unusual transaction patterns for fraud detection, and guides users through the app — all running locally without sending a single byte to the cloud.</p>
+                <div class="feature-icon-wrap">
+                    <!-- AI/brain icon -->
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 3 2 5.5 5 7v2h4v-2c3-1.5 5-4 5-7a7 7 0 0 0-7-7z"/><line x1="10" y1="22" x2="14" y2="22"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+                </div>
+                <h2>6-Layer AI Fraud Engine</h2>
+                <p>A heuristic AI engine runs natively on the Raspberry Pi — no cloud API required. It analyzes transaction velocity, historical baselines, and social graph trust to catch anomalies and freeze fraudulent transfers instantly.</p>
             </div>
-            <div class="feature-visual">[ AI Assistant UI ]</div>
+            <div class="feature-visual">[ AI Fraud Engine ]</div>
+        </div>
+
+        <div class="feature-row fade-up">
+            <div class="feature-text">
+                <div class="feature-icon-wrap">
+                    <!-- Star/trust icon -->
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </div>
+                <h2>TrustScore Credit System</h2>
+                <p>Every verified transaction builds a user's community TrustScore — a reputation metric that unlocks fairer access to microfinance lending. Better behavior means better credit, powered entirely by local activity data.</p>
+            </div>
+            <div class="feature-visual">[ TrustScore Dashboard ]</div>
         </div>
     </div>
 </section>
