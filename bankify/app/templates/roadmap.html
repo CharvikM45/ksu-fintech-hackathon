@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+    .roadmap-hero {
+        padding: 8rem 0 4rem;
+        background: var(--bg-dark);
+        color: var(--text-inverse);
+        text-align: center;
+    }
+
+    /* Vertical Timeline */
+    .timeline {
+        position: relative;
+        max-width: 800px;
+        margin: 6rem auto;
+        padding-left: 2rem;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--border);
+    }
+
+    .phase {
+        position: relative;
+        margin-bottom: 4rem;
+        padding-left: 3rem;
+    }
+
+    .phase:last-child {
+        margin-bottom: 0;
+    }
+
+    .phase-dot {
+        position: absolute;
+        left: -2.35rem; /* center on the line */
+        top: 0.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 50%;
+        background: var(--bg-surface);
+        border: 2px solid var(--border);
+        z-index: 2;
+    }
+
+    .phase.complete .phase-dot {
+        background: var(--success);
+        border-color: var(--success);
+    }
+
+    .phase.in-progress .phase-dot {
+        background: var(--accent-primary);
+        border-color: var(--accent-primary);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%   { box-shadow: 0 0 0 0 rgba(13, 122, 111, 0.4); }
+        70%  { box-shadow: 0 0 0 10px rgba(13, 122, 111, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(13, 122, 111, 0); }
+    }
+
+    .phase-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .phase-date {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        font-family: var(--font-body);
+        font-weight: 500;
+        background: var(--bg-primary);
+        padding: 0.2rem 0.6rem;
+        border-radius: 99px;
+    }
+
+    .phase-list {
+        list-style-type: none;
+        margin-top: 1rem;
+    }
+
+    .phase-list li {
+        position: relative;
+        padding-left: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+    }
+
+    .phase-list li::before {
+        content: '→';
+        position: absolute;
+        left: 0;
+        color: var(--accent-primary);
+    }
+
+    .phase.complete .phase-list li::before {
+        color: var(--success);
+        content: '✓';
+    }
+
+    /* Impact Vision */
+    .impact-section {
+        background: var(--bg-dark);
+        color: var(--text-inverse);
+        padding: 8rem 0;
+    }
+
+    .impact-statement {
+        font-size: clamp(1.8rem, 3.5vw, 3rem);
+        font-family: var(--font-display);
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 4rem;
+        max-width: 900px;
+        color: var(--text-inverse);
+        opacity: 0.3;
+        transition: opacity 0.7s ease, transform 0.7s ease;
+        transform: translateY(24px);
+    }
+
+    .impact-statement.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Form & Partnerships */
+    .partnerships-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: center;
+    }
+
+    .email-capture {
+        background: var(--bg-surface);
+        padding: 3rem;
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        box-shadow: 0 20px 40px -10px rgba(0,0,0,0.05);
+    }
+
+    .form-group {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .pill-input {
+        flex: 1;
+        padding: 0.9rem 1.5rem;
+        border-radius: var(--radius-pill);
+        border: 1px solid var(--border);
+        background: var(--bg-primary);
+        font-family: var(--font-body);
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        outline: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .pill-input:focus {
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 3px rgba(13,122,111,0.1);
+    }
+
+    @media (max-width: 768px) {
+        .partnerships-grid { grid-template-columns: 1fr; }
+        .form-group { flex-direction: column; }
+        .pill-input { border-radius: 12px; }
+        .form-group .btn { border-radius: 12px; width: 100%; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="roadmap-hero">
+    <div class="container fade-up">
+        <h1 style="font-size: 3.5rem; margin-bottom: 1rem;">Where We're Going.</h1>
+        <p style="font-size: 1.25rem; opacity: 0.8; max-width: 700px; margin: 0 auto;">
+            Our mission is to establish Bankify as the default offline financial rail globally. Here is our master plan to scale from prototype to ubiquitous infrastructure.
+        </p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="timeline">
+            
+            <div class="phase complete fade-up">
+                <div class="phase-dot"></div>
+                <h3 class="phase-title">Phase 1 — Concept & Research <span class="phase-date">Completed Q1 2026</span></h3>
+                <ul class="phase-list">
+                    <li>Market analysis of unbanked populations in emerging markets</li>
+                    <li>Cryptography research for offline double-spend prevention</li>
+                    <li>Initial hardware prototyping and component sourcing</li>
+                </ul>
+            </div>
+
+            <div class="phase in-progress fade-up delay-100">
+                <div class="phase-dot"></div>
+                <h3 class="phase-title">Phase 2 — Prototype & Development <span class="phase-date">Current</span></h3>
+                <ul class="phase-list">
+                    <li>Build end-to-end mesh network using LoRa/Bluetooth</li>
+                    <li>Develop Flask-based centralized ledger and reconciliation engine</li>
+                    <li>Finalize CAD models for the merchant terminal</li>
+                    <li>Launch internal alpha test with simulated offline conditions</li>
+                </ul>
+            </div>
+
+            <div class="phase fade-up delay-200">
+                <div class="phase-dot"></div>
+                <h3 class="phase-title">Phase 3 — Testing & Validation <span class="phase-date">Q3 2026</span></h3>
+                <ul class="phase-list">
+                    <li>Third-party security audit of the offline signing protocol</li>
+                    <li>Hardware stress testing (thermal, power failure, connectivity loss)</li>
+                    <li>UI/UX studies with actual merchants and users</li>
+                </ul>
+            </div>
+
+            <div class="phase fade-up delay-300">
+                <div class="phase-dot"></div>
+                <h3 class="phase-title">Phase 4 — Partnerships & Pilot Launch <span class="phase-date">Q4 2026</span></h3>
+                <ul class="phase-list">
+                    <li>Secure partnerships with local NGOs and regional banks</li>
+                    <li>Deploy 100 beta terminals in a target pilot region</li>
+                    <li>Monitor transaction throughput and reconciliation speeds</li>
+                </ul>
+            </div>
+
+            <div class="phase fade-up delay-400">
+                <div class="phase-dot"></div>
+                <h3 class="phase-title">Phase 5 — Full Market Launch <span class="phase-date">2027</span></h3>
+                <ul class="phase-list">
+                    <li>Scale production of Bankify terminals</li>
+                    <li>Open API platform for third-party developer integration</li>
+                    <li>Expand to 5 new target countries</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="impact-section">
+    <div class="container">
+        <h2 class="text-gradient" style="font-size: 1.5rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4rem;">The Impact Vision</h2>
+        
+        <div class="impact-statement scroll-reveal">
+            "By 2028, Bankify will process <span style="color: var(--accent-soft);">1 million offline transactions</span> daily, serving communities forgotten by traditional broadband infrastructure."
+        </div>
+        
+        <div class="impact-statement scroll-reveal delay-100">
+            "We aren't just building a POS system; we are building an <span style="color: var(--success);">uncensorable, unbreakable financial rail</span> for the developing world."
+        </div>
+        
+        <div class="impact-statement scroll-reveal delay-200">
+            "Zero cloud dependency means <span style="color: var(--accent-gold);">zero downtime</span>. Commerce never stops, even when the grid does."
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="partnerships-grid">
+            <div class="fade-up">
+                <h2 style="font-size: 2.5rem; margin-bottom: 1.5rem;">Join the Network</h2>
+                <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 2rem;">
+                    We are actively seeking strategic partners to accelerate our go-to-market plan.
+                </p>
+                <ul class="phase-list" style="font-size: 1.1rem;">
+                    <li style="margin-bottom: 1rem; color: var(--text-primary);"><strong>Advisors:</strong> Expertise in fintech regulation and emerging markets.</li>
+                    <li style="margin-bottom: 1rem; color: var(--text-primary);"><strong>Hardware Partners:</strong> Manufacturing at scale and supply chain optimization.</li>
+                    <li style="margin-bottom: 1rem; color: var(--text-primary);"><strong>Investors:</strong> Seed funding to finalize Phase 2 and launch Phase 3 pilots.</li>
+                    <li style="margin-bottom: 1rem; color: var(--text-primary);"><strong>Pilot Users:</strong> NGOs or businesses operating in low-connectivity areas.</li>
+                </ul>
+            </div>
+            
+            <div class="email-capture fade-up delay-200">
+                <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Stay Updated</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    Get notified about our product launch, pilot programs, and investment rounds. No spam.
+                </p>
+                
+                <form action="{{ url_for('roadmap.roadmap') }}" method="POST">
+                    <div class="form-group">
+                        <input type="email" name="email" class="pill-input" placeholder="Enter your email address" required>
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </div>
+                </form>
+                
+                {% if request.method == 'POST' %}
+                <div style="margin-top: 1rem; padding: 1rem; background: var(--success); color: white; border-radius: 8px; font-size: 0.9rem; text-align: center;">
+                    Thanks for subscribing! We'll be in touch soon.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Special intersection observer for the large impact statements
+    const impactObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.scroll-reveal').forEach(el => {
+        impactObserver.observe(el);
+    });
+</script>
+{% endblock %}

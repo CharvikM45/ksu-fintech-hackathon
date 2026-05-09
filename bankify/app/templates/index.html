@@ -1,0 +1,505 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+    /* ── Hero ── */
+    .hero {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 8rem 1.5rem 5rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        background:
+            radial-gradient(ellipse 70% 50% at 60% 0%, rgba(13,122,111,0.07) 0%, transparent 70%),
+            radial-gradient(ellipse 50% 40% at 10% 90%, rgba(212,151,42,0.06) 0%, transparent 60%),
+            var(--bg-primary);
+    }
+
+    /* Subtle grid texture overlay */
+    .hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(var(--border) 1px, transparent 1px),
+                          linear-gradient(90deg, var(--border) 1px, transparent 1px);
+        background-size: 48px 48px;
+        opacity: 0.25;
+        pointer-events: none;
+    }
+
+    .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.35rem 1rem;
+        background: rgba(13, 122, 111, 0.08);
+        border: 1px solid rgba(13, 122, 111, 0.2);
+        border-radius: var(--radius-pill);
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--accent-primary);
+        margin-bottom: 2rem;
+    }
+
+    .hero-title {
+        font-size: clamp(3.2rem, 6vw, 5.5rem);
+        font-weight: 800;
+        letter-spacing: -0.035em;
+        line-height: 1.08;
+        max-width: 820px;
+        margin: 0 auto 1.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.15rem;
+        color: var(--text-secondary);
+        max-width: 540px;
+        margin: 0 auto 2.5rem;
+        line-height: 1.7;
+        font-weight: 400;
+    }
+
+    .hero-ctas {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .hero-visual {
+        margin-top: 5rem;
+        width: 100%;
+        max-width: 900px;
+        height: 380px;
+        background: linear-gradient(135deg, var(--bg-surface) 0%, #EDE9E3 100%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow:
+            0 0 0 1px rgba(255,255,255,0.6) inset,
+            0 32px 64px -12px rgba(0,0,0,0.08),
+            0 8px 24px -4px rgba(0,0,0,0.04);
+        animation: float 7s ease-in-out infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-family: var(--font-display);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50%       { transform: translateY(-16px); }
+    }
+
+    /* ── Stats / Problem ── */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 3rem;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-family: var(--font-display);
+        font-size: 4rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        color: var(--accent-soft);
+        line-height: 1;
+        margin-bottom: 0.75rem;
+    }
+
+    .stat-label {
+        font-size: 1rem;
+        color: var(--text-inverse-2);
+        line-height: 1.5;
+        font-weight: 400;
+    }
+
+    /* ── Steps / How It Works ── */
+    .steps-wrapper {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        position: relative;
+        margin-top: 4rem;
+    }
+
+    .steps-connector {
+        position: absolute;
+        top: 2rem;
+        left: calc(12.5%);
+        right: calc(12.5%);
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--border), var(--border), transparent);
+    }
+
+    .step {
+        text-align: center;
+        padding: 0 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .step-icon {
+        width: 4rem;
+        height: 4rem;
+        border-radius: 50%;
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.75rem;
+        font-size: 1.4rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .step:hover .step-icon {
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 4px rgba(13,122,111,0.08), 0 4px 16px rgba(0,0,0,0.06);
+    }
+
+    .step-num {
+        position: absolute;
+        top: -0.4rem;
+        right: calc(50% - 2.5rem);
+        width: 1.25rem;
+        height: 1.25rem;
+        background: var(--accent-primary);
+        color: #fff;
+        border-radius: 50%;
+        font-size: 0.65rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+    }
+
+    .step-title {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-family: var(--font-display);
+    }
+
+    .step-desc {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        line-height: 1.6;
+    }
+
+    /* ── Features ── */
+    .features-section {
+        background: var(--bg-surface);
+    }
+
+    .feature-row {
+        display: flex;
+        align-items: center;
+        gap: 5rem;
+        padding: 5rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .feature-row:last-child { border-bottom: none; }
+
+    .feature-row:nth-child(even) {
+        flex-direction: row-reverse;
+    }
+
+    .feature-text { flex: 1; }
+
+    .feature-icon-wrap {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 3rem;
+        height: 3rem;
+        background: rgba(13,122,111,0.08);
+        border-radius: var(--radius-md);
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .feature-text h2 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        letter-spacing: -0.03em;
+    }
+
+    .feature-text p {
+        color: var(--text-secondary);
+        font-size: 1.05rem;
+        line-height: 1.7;
+        max-width: 440px;
+    }
+
+    .feature-visual {
+        flex: 1;
+        height: 320px;
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        font-family: var(--font-display);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    /* ── Demo CTA ── */
+    .demo-section {
+        background: var(--bg-dark);
+        padding: 7rem 0;
+        text-align: center;
+    }
+
+    .demo-section h2 {
+        font-size: clamp(2.5rem, 4vw, 3.5rem);
+        margin-bottom: 1rem;
+    }
+
+    .demo-section p {
+        color: var(--text-inverse-2);
+        font-size: 1.1rem;
+        margin-bottom: 3rem;
+    }
+
+    .iframe-wrap {
+        max-width: 1000px;
+        margin: 0 auto;
+        height: 600px;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        border: 1px solid var(--border-dark);
+        box-shadow: 0 40px 80px -20px rgba(0,0,0,0.6);
+    }
+
+    .iframe-wrap iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+        .steps-wrapper   { grid-template-columns: repeat(2, 1fr); gap: 3rem; }
+        .steps-connector { display: none; }
+        .feature-row, .feature-row:nth-child(even) { flex-direction: column; gap: 2.5rem; }
+        .feature-text p { max-width: none; }
+    }
+
+    @media (max-width: 600px) {
+        .stats-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+        .steps-wrapper { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── HERO ── -->
+<section class="hero">
+    <div style="position:relative; z-index:2; display:flex; flex-direction:column; align-items:center;">
+        <span class="hero-eyebrow fade-up">✦ Offline-First Fintech Infrastructure</span>
+
+        <h1 class="hero-title fade-up delay-100">
+            Banking that works<br>
+            <span class="text-gradient">when the grid doesn't.</span>
+        </h1>
+
+        <p class="hero-subtitle fade-up delay-200">
+            Bankify gives communities reliable, secure financial rails — P2P transfers, merchant POS, and real-time ledger sync — even when there's no internet in sight.
+        </p>
+
+        <div class="hero-ctas fade-up delay-300">
+            <a href="{{ url_for('product.product') }}" class="btn btn-primary btn-lg">Explore Bankify</a>
+            <a href="#demo" class="btn btn-ghost btn-lg">Watch Demo</a>
+        </div>
+
+        <div class="hero-visual fade-up delay-400">
+            <!-- PLACEHOLDER: Replace with actual product dashboard screenshot -->
+            Product Dashboard Preview
+        </div>
+    </div>
+</section>
+
+<!-- ── PROBLEM STATS ── -->
+<section class="section bg-dark">
+    <div class="container">
+        <div class="text-center" style="margin-bottom: 4rem;">
+            <span class="section-label section-label-dark fade-up">The Problem</span>
+            <h2 class="fade-up delay-100" style="font-size: clamp(2rem, 3.5vw, 3rem); max-width: 600px; margin: 0 auto;">
+                Financial exclusion is a systems problem.
+            </h2>
+        </div>
+
+        <div class="stats-grid">
+            <div class="fade-up delay-100">
+                <div class="stat-number" data-target="1.4" data-suffix="B">0</div>
+                <div class="stat-label">People worldwide with no access to formal banking</div>
+            </div>
+            <div class="fade-up delay-200">
+                <div class="stat-number" data-target="72" data-suffix="%">0</div>
+                <div class="stat-label">Of mobile payment failures traced to poor connectivity</div>
+            </div>
+            <div class="fade-up delay-300">
+                <div class="stat-number" data-target="0" data-suffix="ms">0</div>
+                <div class="stat-label">Downtime tolerance — Bankify processes transactions locally, always</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="section" style="background: var(--bg-surface);">
+    <div class="container">
+        <div class="text-center" style="margin-bottom: 1rem;">
+            <span class="section-label fade-up">How It Works</span>
+            <h2 class="fade-up delay-100" style="font-size: clamp(2rem, 3.5vw, 2.8rem);">Four steps. Zero cloud required.</h2>
+        </div>
+
+        <div class="steps-wrapper">
+            <div class="steps-connector"></div>
+
+            <div class="step fade-up delay-100">
+                <div class="step-icon">
+                    <span class="step-num">1</span>
+                    📱
+                </div>
+                <h3 class="step-title">Initiate Offline</h3>
+                <p class="step-desc">Users open a P2P transfer or POS checkout entirely within the Bankify app — no signal needed.</p>
+            </div>
+
+            <div class="step fade-up delay-200">
+                <div class="step-icon">
+                    <span class="step-num">2</span>
+                    🔐
+                </div>
+                <h3 class="step-title">Sign & Store</h3>
+                <p class="step-desc">Transactions are cryptographically signed and written to the local tamper-proof ledger.</p>
+            </div>
+
+            <div class="step fade-up delay-300">
+                <div class="step-icon">
+                    <span class="step-num">3</span>
+                    🔄
+                </div>
+                <h3 class="step-title">Mesh Sync</h3>
+                <p class="step-desc">Devices broadcast deltas peer-to-peer or queue for cloud sync when connectivity returns.</p>
+            </div>
+
+            <div class="step fade-up delay-400">
+                <div class="step-icon">
+                    <span class="step-num">4</span>
+                    ✅
+                </div>
+                <h3 class="step-title">Settle & Verify</h3>
+                <p class="step-desc">The central ledger reconciles every queued transaction — no double-spend, no data loss.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section class="section features-section">
+    <div class="container">
+        <span class="section-label fade-up">Features</span>
+
+        <div class="feature-row fade-up delay-100">
+            <div class="feature-text">
+                <div class="feature-icon-wrap">🛡️</div>
+                <h2>Military-Grade Offline Security</h2>
+                <p>Every transaction is hash-chained and signed with Ed25519 elliptic curve cryptography before it ever touches the local ledger. Even if the device is seized, the data is cryptographically useless without the user's private key.</p>
+            </div>
+            <div class="feature-visual">[ Security Architecture ]</div>
+        </div>
+
+        <div class="feature-row fade-up">
+            <div class="feature-text">
+                <div class="feature-icon-wrap">🏪</div>
+                <h2>Vendor POS Mode</h2>
+                <p>Merchants get a dedicated point-of-sale interface optimized for high-throughput, offline environments. Accept payments, issue receipts, and reconcile end-of-day totals — no bank terminal or internet required.</p>
+            </div>
+            <div class="feature-visual">[ POS Interface Mockup ]</div>
+        </div>
+
+        <div class="feature-row fade-up delay-100">
+            <div class="feature-text">
+                <div class="feature-icon-wrap">🤖</div>
+                <h2>Lightweight AI Assistant</h2>
+                <p>An on-device financial assistant provides spending insights, flags unusual transaction patterns for fraud detection, and guides users through the app — all running locally without sending a single byte to the cloud.</p>
+            </div>
+            <div class="feature-visual">[ AI Assistant UI ]</div>
+        </div>
+    </div>
+</section>
+
+<!-- ── DEMO ── -->
+<section id="demo" class="demo-section">
+    <div class="container">
+        <span class="section-label section-label-dark fade-up">Live Demo</span>
+        <h2 class="text-gradient-soft fade-up delay-100">See It Live</h2>
+        <p class="fade-up delay-200">Experience the full Bankify infrastructure in your browser.</p>
+
+        <div class="iframe-wrap fade-up delay-300">
+            <!-- DEMO URL PLACEHOLDER — set src to your live demo URL -->
+            <iframe src="about:blank" title="Bankify Live Demo"></iframe>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Counter animation
+    const counters = document.querySelectorAll('.stat-number[data-target]');
+    let animated = false;
+
+    const animateCounters = () => {
+        if (animated) return;
+        animated = true;
+
+        counters.forEach(el => {
+            const target = parseFloat(el.dataset.target);
+            const suffix = el.dataset.suffix || '';
+            const duration = 1800;
+            const steps = 60;
+            const increment = target / steps;
+            let current = 0;
+            let step = 0;
+
+            const tick = () => {
+                step++;
+                current = Math.min(current + increment, target);
+                el.textContent = (target % 1 !== 0 ? current.toFixed(1) : Math.round(current)) + suffix;
+                if (step < steps) requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        });
+    };
+
+    const statsObs = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) animateCounters();
+    }, { threshold: 0.3 });
+
+    const statsGrid = document.querySelector('.stats-grid');
+    if (statsGrid) statsObs.observe(statsGrid);
+</script>
+{% endblock %}
