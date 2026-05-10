@@ -497,7 +497,7 @@ h1, h2, h3, h4, h5, h6, .form-heading, .hero-amount {
     box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: var(--transition-smooth);
 }
 .insight-card:hover { transform: translateY(-3px); background: rgba(255, 255, 255, 0.05); border-color: var(--primary); box-shadow: 0 8px 24px var(--primary-glow); }
-.insight-icon { font-size: 24px; background: rgba(0, 214, 50, 0.15); border-radius: 12px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 214, 50, 0.4); flex-shrink: 0; }
+.insight-icon { font-size: 24px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255, 255, 255, 0.1); flex-shrink: 0; filter: grayscale(1); }
 .insight-content { flex: 1; min-width: 0; }
 .insight-title { font-size: 1.05rem; font-family: var(--font-display); font-weight: 600; color: #fff; margin-bottom: 4px; }
 .insight-message { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; }
