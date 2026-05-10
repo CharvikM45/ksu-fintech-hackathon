@@ -20,7 +20,8 @@ from routes.ai import ai_bp
 from routes.credit import credit_bp
 
 app = Flask(__name__,
-            static_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'frontend'),
+            static_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static'),
+            template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'),
             static_url_path='')
 
 CORS(app)
@@ -37,7 +38,7 @@ app.register_blueprint(credit_bp)
 @app.route('/')
 def serve_frontend():
     """Serve the frontend SPA."""
-    return send_from_directory(app.static_folder, 'index.html')
+    return send_from_directory(app.template_folder, 'index.html')
 
 
 @app.route('/<path:path>')
