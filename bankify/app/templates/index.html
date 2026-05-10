@@ -476,15 +476,53 @@
 </section>
 
 <!-- ── DEMO ── -->
-<section id="demo" class="demo-section">
+<section id="demo" class="demo-section" style="background: var(--bg-dark); padding: 7rem 0; text-align: left; color: var(--text-inverse);">
     <div class="container">
-        <span class="section-label section-label-dark fade-up">Live Demo</span>
-        <h2 class="text-gradient-soft fade-up delay-100">See It Live</h2>
-        <p class="fade-up delay-200">Experience the full Bankify infrastructure in your browser.</p>
+        <div style="text-align: center; margin-bottom: 4rem;">
+            <span class="section-label section-label-dark fade-up">Live Demo</span>
+            <h2 class="text-gradient-soft fade-up delay-100" style="font-size: clamp(2.5rem, 4vw, 3.5rem); margin-bottom: 1rem;">MeshBank Interactive Demo</h2>
+            <p class="fade-up delay-200" style="color: var(--text-inverse-2); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">Experience our offline UI instantly. This embedded demo simulates a fully functional mesh network node right in your browser.</p>
+        </div>
 
-        <div class="iframe-wrap fade-up delay-300">
-            <!-- DEMO URL PLACEHOLDER — set src to your live demo URL -->
-            <iframe src="about:blank" title="Bankify Live Demo"></iframe>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;">
+            <div class="fade-up delay-300">
+                <h3 style="font-size: 1.8rem; margin-bottom: 1.5rem; color: #fff;">Interactive Walkthrough</h3>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                        <div style="background: var(--accent-primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">1</div>
+                        <div>
+                            <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff;">The Login Screen</h4>
+                            <p style="color: var(--text-inverse-2); line-height: 1.6; font-size: 0.95rem;">Click on one of the "Demo Accounts" (like Alice) in the interface to the right to bypass authentication and instantly enter the simulated network.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                        <div style="background: var(--accent-primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">2</div>
+                        <div>
+                            <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff;">The Dashboard</h4>
+                            <p style="color: var(--text-inverse-2); line-height: 1.6; font-size: 0.95rem;">Once inside, you'll see your mock balance and transaction history. Use the bottom navigation or quick action buttons to explore different features.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                        <div style="background: var(--accent-primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">3</div>
+                        <div>
+                            <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff;">Send Money Portion</h4>
+                            <p style="color: var(--text-inverse-2); line-height: 1.6; font-size: 0.95rem;">Click the <strong>Send</strong> button. Enter a phone number, amount, and any 4-digit PIN to securely sign the transaction. Watch as your balance updates instantly.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="iframe-wrap fade-up delay-400" style="width: 100%; height: 750px; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-dark); box-shadow: 0 40px 80px -20px rgba(0,0,0,0.6); position: relative; background: #1a1a1a; max-width: 420px; margin: 0 auto;">
+                <iframe src="/demo/meshbank" title="MeshBank Interactive Demo" style="width: 100%; height: 100%; border: none;"></iframe>
+                <div style="position: absolute; inset: 0; pointer-events: none; border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-lg);"></div>
+            </div>
         </div>
     </div>
 </section>
