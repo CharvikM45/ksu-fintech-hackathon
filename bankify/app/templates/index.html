@@ -162,7 +162,7 @@
         margin: 0 auto 1.75rem;
         box-shadow: 0 2px 12px rgba(0,0,0,0.04);
         transition: border-color 0.3s, box-shadow 0.3s;
-        color: var(--icon-color, #3B2F2B);
+        color: #555;
     }
 
     .step:hover .step-icon {
@@ -227,10 +227,10 @@
         justify-content: center;
         width: 3rem;
         height: 3rem;
-        background: rgba(13,122,111,0.08);
+        background: rgba(0,0,0,0.05);
         border-radius: var(--radius-md);
         margin-bottom: 1.5rem;
-        color: #3B2F2B;
+        color: #444;
     }
 
     .feature-text h2 {
@@ -577,21 +577,27 @@
                 
                 <div class="hardware-features" style="display: flex; flex-direction: column; gap: 1.5rem;">
                     <div style="display: flex; gap: 1.2rem; align-items: flex-start;">
-                        <div style="font-size: 1.5rem; background: rgba(0, 214, 50, 0.1); padding: 0.8rem; border-radius: 12px; border: 1px solid rgba(0, 214, 50, 0.2);">☀️</div>
+                        <div style="font-size: 1.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.94 5.41 17.94 3.1"/><path d="M8.06 5.41 6.06 3.1"/><path d="M12 16V6"/><path d="M12 16c3.31 0 6 2.69 6 6H6c0-3.31 2.69-6 6-6Z"/></svg>
+                        </div>
                         <div>
                             <h4 style="font-weight: 600; margin-bottom: 0.3rem;">Solar Autonomous</h4>
                             <p style="color: var(--text-muted); font-size: 0.95rem;">High-efficiency integrated photovoltaic panels allow for continuous 24/7 operation in off-grid regions.</p>
                         </div>
                     </div>
                     <div style="display: flex; gap: 1.2rem; align-items: flex-start;">
-                        <div style="font-size: 1.5rem; background: rgba(0, 214, 50, 0.1); padding: 0.8rem; border-radius: 12px; border: 1px solid rgba(0, 214, 50, 0.2);">📡</div>
+                        <div style="font-size: 1.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"/><circle cx="12" cy="12" r="3"/><path d="M12 21V12"/><path d="M12 3V12"/><path d="M21 12H12"/><path d="M3 12H12"/></svg>
+                        </div>
                         <div>
                             <h4 style="font-weight: 600; margin-bottom: 0.3rem;">Mesh Networked</h4>
                             <p style="color: var(--text-muted); font-size: 0.95rem;">Equipped with high-gain LoRa/WiFi mesh transceivers to form a localized financial backbone without the internet.</p>
                         </div>
                     </div>
                     <div style="display: flex; gap: 1.2rem; align-items: flex-start;">
-                        <div style="font-size: 1.5rem; background: rgba(0, 214, 50, 0.1); padding: 0.8rem; border-radius: 12px; border: 1px solid rgba(0, 214, 50, 0.2);">🛡️</div>
+                        <div style="font-size: 1.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
                         <div>
                             <h4 style="font-weight: 600; margin-bottom: 0.3rem;">Ruggedized Chassis</h4>
                             <p style="color: var(--text-muted); font-size: 0.95rem;">Impact-resistant, dust-proof, and water-resistant enclosure designed for lifelong field deployment.</p>
@@ -659,5 +665,20 @@
 
     const statsGrid = document.querySelector('.stats-grid');
     if (statsGrid) statsObs.observe(statsGrid);
+
+    // Model Viewer Progress Bar
+    const modelViewer = document.querySelector('model-viewer');
+    const progressBar = document.querySelector('.progress-bar');
+    const updateBar = document.querySelector('.update-bar');
+
+    if (modelViewer) {
+        modelViewer.addEventListener('progress', (event) => {
+            const progress = event.detail.totalProgress;
+            if (updateBar) updateBar.style.width = `${progress * 100}%`;
+            if (progress === 1 && progressBar) {
+                progressBar.style.display = 'none';
+            }
+        });
+    }
 </script>
 {% endblock %}
