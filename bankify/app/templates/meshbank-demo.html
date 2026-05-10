@@ -13,6 +13,72 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/meshbank/styles/main.css">
+    <style>
+        /* Walkthrough Specific Styles */
+        .walkthrough-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 9000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .walkthrough-overlay.active { display: flex; }
+        .walkthrough-card {
+            background: var(--bg-panel);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 0 50px rgba(0, 214, 50, 0.3);
+            position: relative;
+            animation: slideUp 0.4s ease;
+        }
+        .walkthrough-step-num {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+        .walkthrough-title {
+            font-size: 1.5rem;
+            font-family: var(--font-display);
+            margin-bottom: 12px;
+            color: #fff;
+            text-align: center;
+        }
+        .walkthrough-text {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .walkthrough-footer {
+            display: flex;
+            gap: 12px;
+        }
+        .highlight-element {
+            position: relative;
+            z-index: 9001 !important;
+            box-shadow: 0 0 0 4px var(--primary), 0 0 20px var(--primary-glow) !important;
+            pointer-events: auto !important;
+        }
+    </style>
 </head>
 <body>
     <!-- Premium Aurora Background -->
@@ -20,6 +86,19 @@
 
     <!-- Toast Notifications -->
     <div id="toast-container" class="toast-container"></div>
+
+    <!-- Walkthrough Overlay -->
+    <div id="walkthrough-overlay" class="walkthrough-overlay">
+        <div class="walkthrough-card">
+            <div id="walkthrough-step-badge" class="walkthrough-step-num">1</div>
+            <h3 id="walkthrough-title" class="walkthrough-title">Welcome to Bankify</h3>
+            <p id="walkthrough-text" class="walkthrough-text">Let's take a quick tour of your new offline bank.</p>
+            <div class="walkthrough-footer">
+                <button id="walkthrough-skip" class="btn btn-secondary flex-1" onclick="endWalkthrough()">Skip</button>
+                <button id="walkthrough-next" class="btn btn-primary flex-1" onclick="nextWalkthroughStep()">Next Step</button>
+            </div>
+        </div>
+    </div>
 
     <!-- ============ AUTH SCREEN (Redesigned Landing) ============ -->
     <div id="auth-screen" class="auth-page">
@@ -659,10 +738,103 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="/static/meshbank/js/qr.js"></script>
     <script src="/static/meshbank/js/assistant.js"></script>
     <script src="/static/meshbank/js/app.js"></script>
+    <script>
+        // Walkthrough Logic
+        let currentStep = 0;
+        const walkthroughSteps = [
+            {
+                title: "Welcome to Bankify",
+                text: "MeshBank is now Bankify! This is a live interactive demo. Everything here is running in your browser.",
+                element: null
+            },
+            {
+                title: "The Dashboard",
+                text: "This is your main command center. You can see your balance and recent transactions here.",
+                element: "#page-dashboard"
+            },
+            {
+                title: "Quick Transfers",
+                text: "Use these buttons to quickly send or receive money from nearby mesh nodes.",
+                element: ".balance-actions"
+            },
+            {
+                title: "Send Money",
+                text: "Click 'Send' in the bottom dock to transfer funds via phone number. It works entirely offline!",
+                element: "#nav-send"
+            },
+            {
+                title: "AI Financial Insights",
+                text: "Our local AI analyzes your spending habits to provide smart tips and detect fraud.",
+                element: "#nav-ai"
+            },
+            {
+                title: "TrustScore",
+                text: "Your financial identity is based on community trust. Higher scores unlock micro-loans.",
+                element: "#nav-credit"
+            },
+            {
+                title: "Ready to Explore?",
+                text: "Go ahead and try a demo login to see real data, or create your own account!",
+                element: ".demo-section"
+            }
+        ];
+
+        function startWalkthrough() {
+            currentStep = 0;
+            document.getElementById('walkthrough-overlay').classList.add('active');
+            updateWalkthrough();
+        }
+
+        function endWalkthrough() {
+            document.getElementById('walkthrough-overlay').classList.remove('active');
+            const prevElement = walkthroughSteps[currentStep-1]?.element;
+            if (prevElement) {
+                const el = document.querySelector(prevElement);
+                if (el) el.classList.remove('highlight-element');
+            }
+        }
+
+        function nextWalkthroughStep() {
+            currentStep++;
+            if (currentStep >= walkthroughSteps.length) {
+                endWalkthrough();
+            } else {
+                updateWalkthrough();
+            }
+        }
+
+        function updateWalkthrough() {
+            const step = walkthroughSteps[currentStep];
+            document.getElementById('walkthrough-step-badge').innerText = currentStep + 1;
+            document.getElementById('walkthrough-title').innerText = step.title;
+            document.getElementById('walkthrough-text').innerText = step.text;
+            document.getElementById('walkthrough-next').innerText = currentStep === walkthroughSteps.length - 1 ? "Get Started" : "Next Step";
+
+            // Remove previous highlight
+            const prevStep = walkthroughSteps[currentStep - 1];
+            if (prevStep && prevStep.element) {
+                const prevEl = document.querySelector(prevStep.element);
+                if (prevEl) prevEl.classList.remove('highlight-element');
+            }
+
+            // Add new highlight
+            if (step.element) {
+                const el = document.querySelector(step.element);
+                if (el) {
+                    el.classList.add('highlight-element');
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+
+        // Auto-start walkthrough on first visit to demo
+        window.addEventListener('load', () => {
+            setTimeout(startWalkthrough, 1000);
+        });
+    </script>
     <!-- Report Fraud Modal -->
     <div id="report-fraud-modal" class="modal-overlay">
         <div class="modal-content glass-panel" style="max-width: 400px; padding: 24px;">
