@@ -29,6 +29,8 @@ env.bak/
 venv.bak/
 .idea/
 .vscode/
-database/meshbank.db
-database/meshbank.db-wal
-database/meshbank.db-shm
+*.DS_Store
+node_modules/
+meshbank/database/meshbank.db
+meshbank/database/meshbank.db-wal
+meshbank/database/meshbank.db-shm
