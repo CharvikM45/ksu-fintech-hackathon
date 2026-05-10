@@ -6,6 +6,15 @@ MeshBank is an offline-first banking system that runs on a Raspberry Pi (or any 
 
 ---
 
+## 🌍 Project Ecosystem
+
+Bankify is more than just a microbank; it's a complete hardware and software ecosystem:
+1. **[Bankify Product Site](./bankify)**: A premium showcase for the mission, team, and hardware.
+2. **[MeshBank App](./meshbank)**: The actual offline microbanking application.
+3. **[Interactive Demo](https://bankify.dev/demo/meshbank)**: A browser-based sandbox with a guided walkthrough.
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -112,6 +121,14 @@ sudo apt install hostapd dnsmasq
 | **Financial Insights** | Spending patterns, frequent recipients, cash flow analysis |
 | **Chat Assistant** | Intent-matching NLP with regex patterns — works fully offline |
 | **Balance Prediction** | Linear regression on daily net spending |
+
+---
+
+## 🛠️ Hardware & CAD
+
+The Bankify ecosystem includes custom ruggedized hardware designed for Raspberry Pi deployment.
+- **3D CAD Model**: View the interactive 3D assembly directly on the [Bankify Landing Page](http://localhost:8000).
+- **Enclosure**: Solar-ready, impact-resistant design for industrial field deployment.
 
 ---
 
