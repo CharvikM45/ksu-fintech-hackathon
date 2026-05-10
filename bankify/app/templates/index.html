@@ -532,6 +532,54 @@
     </div>
 </section>
 
+<!-- ── HARDWARE ARCHITECTURE ── -->
+<section id="hardware" class="hardware-section" style="padding: 7rem 0; background: #000; color: #fff;">
+    <div class="container">
+        <div class="grid" style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 5rem; align-items: center;">
+            <div class="fade-up">
+                <span class="section-label" style="background: rgba(255,255,255,0.1); color: #fff; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.2);">Industrial Design</span>
+                <h2 class="text-gradient-soft" style="font-size: clamp(2.5rem, 4vw, 3.5rem); margin-bottom: 1.5rem;">The Bankify Terminal</h2>
+                <p style="color: var(--text-secondary); font-size: 1.15rem; line-height: 1.6; margin-bottom: 2rem;">
+                    Our hardware is engineered for the most demanding environments on Earth. From the solar-integrated chassis to the long-range mesh antenna, every millimeter is designed for resilience, modularity, and accessibility.
+                </p>
+                
+                <div class="hardware-features" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div style="display: flex; gap: 1.2rem; align-items: flex-start;">
+                        <div style="font-size: 1.5rem; background: rgba(0, 214, 50, 0.1); padding: 0.8rem; border-radius: 12px; border: 1px solid rgba(0, 214, 50, 0.2);">☀️</div>
+                        <div>
+                            <h4 style="font-weight: 600; margin-bottom: 0.3rem;">Solar Autonomous</h4>
+                            <p style="color: var(--text-muted); font-size: 0.95rem;">High-efficiency integrated photovoltaic panels allow for continuous 24/7 operation in off-grid regions.</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1.2rem; align-items: flex-start;">
+                        <div style="font-size: 1.5rem; background: rgba(0, 214, 50, 0.1); padding: 0.8rem; border-radius: 12px; border: 1px solid rgba(0, 214, 50, 0.2);">📡</div>
+                        <div>
+                            <h4 style="font-weight: 600; margin-bottom: 0.3rem;">Mesh Networked</h4>
+                            <p style="color: var(--text-muted); font-size: 0.95rem;">Equipped with high-gain LoRa/WiFi mesh transceivers to form a localized financial backbone without the internet.</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1.2rem; align-items: flex-start;">
+                        <div style="font-size: 1.5rem; background: rgba(0, 214, 50, 0.1); padding: 0.8rem; border-radius: 12px; border: 1px solid rgba(0, 214, 50, 0.2);">🛡️</div>
+                        <div>
+                            <h4 style="font-weight: 600; margin-bottom: 0.3rem;">Ruggedized Chassis</h4>
+                            <p style="color: var(--text-muted); font-size: 0.95rem;">Impact-resistant, dust-proof, and water-resistant enclosure designed for lifelong field deployment.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cad-viewer-wrap fade-up delay-200" style="width: 100%; height: 600px; background: #0a0a0a; border-radius: var(--radius-xl); border: 1px solid rgba(255,255,255,0.1); overflow: hidden; box-shadow: 0 50px 100px -20px rgba(0,214,50,0.15); position: relative;">
+                <div style="position: absolute; top: 20px; left: 20px; z-index: 5; background: rgba(0,0,0,0.6); padding: 8px 16px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #fff;">
+                    Live 3D CAD Model
+                </div>
+                <iframe src="https://cad.onshape.com/documents/d87cf7618fb3f6d007a8d0cd/w/a52cb5dd6e46efd0fd10cbdf/e/efcba7bd4e2f05030e0eb033?renderMode=0&uiState=6a0100fd0c9f7a479db21343" 
+                        title="Bankify Terminal CAD" 
+                        style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+        </div>
+    </div>
+</section>
+
 {% endblock %}
 
 {% block scripts %}
