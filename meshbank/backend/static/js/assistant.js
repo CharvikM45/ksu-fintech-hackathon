@@ -13,7 +13,7 @@ const Assistant = {
         } catch (err) {
             return {
                 intent: 'error',
-                response: '❌ Could not connect to MeshBot. Make sure the server is running.'
+                response: 'Error: Could not connect to MeshBot. Make sure the server is running.'
             };
         }
     }

@@ -738,3 +738,32 @@ h1, h2, h3, h4, h5, h6, .form-heading, .hero-amount {
         font-size: 3rem;
     }
 }
+
+/* --- Mobile Fixes --- */
+@media (max-width: 480px) {
+    .auth-page {
+        padding: 40px 20px;
+    }
+    .auth-panel-wrapper {
+        padding: 40px 24px;
+    }
+    .glass-panel {
+        padding: 24px;
+    }
+    .page-content {
+        padding: 24px 20px 140px 20px;
+    }
+    .balance-card {
+        padding: 32px 24px;
+    }
+    .balance-amount {
+        font-size: 2.75rem;
+    }
+    .quick-actions-grid {
+        gap: 12px;
+    }
+    .qa-icon-wrapper {
+        width: 48px;
+        height: 48px;
+    }
+}

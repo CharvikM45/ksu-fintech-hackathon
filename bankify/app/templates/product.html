@@ -139,7 +139,31 @@
     @media (max-width: 900px) {
         .arch-section { flex-direction: column; }
     }
+    .progress-bar {
+        display: block;
+        width: 33%;
+        height: 10%;
+        max-height: 2px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate3d(-50%, -50%, 0);
+        border-radius: 25px;
+        box-shadow: 0px 3px 10px 3px rgba(0, 0, 0, 0.5), 0px 0px 5px 1px rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .update-bar {
+        background-color: var(--accent-primary);
+        width: 0%;
+        height: 100%;
+        border-radius: 25px;
+        transition: width 0.3s;
+    }
 </style>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
 {% endblock %}
 
 {% block content %}
@@ -160,13 +184,21 @@
         <p class="fade-up delay-200" style="color: var(--text-secondary); margin-bottom: 0; max-width: 560px;">Rotate, zoom, and inspect the full hardware design — live from OnShape.</p>
         
         <div class="cad-container fade-up delay-200">
-            <!-- OnShape CAD Embed -->
-            <iframe
-                src="https://cad.onshape.com/documents/d87cf7618fb3f6d007a8d0cd/w/a52cb5dd6e46efd0fd10cbdf/e/efcba7bd4e2f05030e0eb033?renderMode=0&uiState=69ff5837b76ab8a5a7d66aae"
-                title="Bankify Hardware Terminal CAD Model"
-                allowfullscreen
-                style="width:100%; height:100%; border:none; border-radius: 24px;"
-            ></iframe>
+            <model-viewer src="{{ url_for('static', filename='assets/cad/Final Assembly.gltf') }}" 
+                          alt="Bankify Terminal 3D CAD Model" 
+                          auto-rotate 
+                          camera-controls 
+                          shadow-intensity="1" 
+                          exposure="1"
+                          bounds="tight"
+                          enable-pan
+                          loading="eager"
+                          auto-rotate-delay="0"
+                          style="width: 100%; height: 100%; background-color: var(--bg-primary);">
+                <div class="progress-bar" slot="progress-bar">
+                    <div class="update-bar"></div>
+                </div>
+            </model-viewer>
         </div>
     </div>
 </section>
@@ -182,8 +214,8 @@
 <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="nodeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#F4F1EC;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#FAFAF8;stop-opacity:1" />
+                            <stop offset="0%" style="stop-color:var(--bg-primary);stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:var(--bg-surface);stop-opacity:1" />
                         </linearGradient>
                         <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
                             <path d="M0,0 L0,6 L8,3 z" fill="#7ECFC8" />
@@ -191,26 +223,26 @@
                     </defs>
 
                     <!-- Edges -->
-                    <path d="M 210 160 L 315 160" stroke="#7ECFC8" stroke-width="2" stroke-dasharray="6,4" fill="none" marker-end="url(#arrow)"/>
-                    <path d="M 485 160 L 590 160" stroke="#7ECFC8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                    <path d="M 210 160 L 315 160" stroke="var(--text-muted)" stroke-width="2" stroke-dasharray="6,4" fill="none" marker-end="url(#arrow)"/>
+                    <path d="M 485 160 L 590 160" stroke="var(--text-muted)" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
 
                     <!-- Nodes -->
                     <g class="arch-block" onclick="showArchDetails('client')">
-                        <rect x="50" y="120" width="160" height="80" rx="12" fill="url(#nodeGrad)" stroke="#0D7A6F" stroke-width="1.5"/>
-                        <text x="130" y="155" font-family="'Syne', sans-serif" font-size="14" font-weight="700" fill="#1A1A18" text-anchor="middle">Client POS</text>
-                        <text x="130" y="175" font-family="'Manrope', sans-serif" font-size="11" fill="#6B6860" text-anchor="middle">Mobile / Terminal</text>
+                        <rect x="50" y="120" width="160" height="80" rx="12" fill="url(#nodeGrad)" stroke="var(--border)" stroke-width="1.5"/>
+                        <text x="130" y="155" font-family="'Syne', sans-serif" font-size="14" font-weight="700" fill="var(--text-primary)" text-anchor="middle">Client POS</text>
+                        <text x="130" y="175" font-family="'Manrope', sans-serif" font-size="11" fill="var(--text-secondary)" text-anchor="middle">Mobile / Terminal</text>
                     </g>
 
                     <g class="arch-block" onclick="showArchDetails('local_ledger')">
-                        <rect x="315" y="120" width="170" height="80" rx="12" fill="url(#nodeGrad)" stroke="#0D7A6F" stroke-width="1.5"/>
-                        <text x="400" y="155" font-family="'Syne', sans-serif" font-size="14" font-weight="700" fill="#1A1A18" text-anchor="middle">Local Ledger</text>
-                        <text x="400" y="175" font-family="'Manrope', sans-serif" font-size="11" fill="#6B6860" text-anchor="middle">SQLite + Hash-chain</text>
+                        <rect x="315" y="120" width="170" height="80" rx="12" fill="url(#nodeGrad)" stroke="var(--border)" stroke-width="1.5"/>
+                        <text x="400" y="155" font-family="'Syne', sans-serif" font-size="14" font-weight="700" fill="var(--text-primary)" text-anchor="middle">Local Ledger</text>
+                        <text x="400" y="175" font-family="'Manrope', sans-serif" font-size="11" fill="var(--text-secondary)" text-anchor="middle">SQLite + Hash-chain</text>
                     </g>
 
                     <g class="arch-block" onclick="showArchDetails('cloud_sync')">
-                        <rect x="590" y="120" width="160" height="80" rx="12" fill="url(#nodeGrad)" stroke="#0D7A6F" stroke-width="1.5"/>
-                        <text x="670" y="155" font-family="'Syne', sans-serif" font-size="14" font-weight="700" fill="#1A1A18" text-anchor="middle">Cloud Sync</text>
-                        <text x="670" y="175" font-family="'Manrope', sans-serif" font-size="11" fill="#6B6860" text-anchor="middle">Delta Reconciliation</text>
+                        <rect x="590" y="120" width="160" height="80" rx="12" fill="url(#nodeGrad)" stroke="var(--border)" stroke-width="1.5"/>
+                        <text x="670" y="155" font-family="'Syne', sans-serif" font-size="14" font-weight="700" fill="var(--text-primary)" text-anchor="middle">Cloud Sync</text>
+                        <text x="670" y="175" font-family="'Manrope', sans-serif" font-size="11" fill="var(--text-secondary)" text-anchor="middle">Delta Reconciliation</text>
                     </g>
                 </svg>
             </div>
@@ -339,5 +371,33 @@
             descEl.style.opacity = 1;
         }, 200);
     };
+
+    // Model Viewer Progress Bar
+    const modelViewer = document.querySelector('model-viewer');
+    const progressBar = document.querySelector('.progress-bar');
+    const updateBar = document.querySelector('.update-bar');
+
+    if (modelViewer) {
+        modelViewer.addEventListener('progress', (event) => {
+            const progress = event.detail.totalProgress;
+            if (updateBar) updateBar.style.width = `${progress * 100}%`;
+            if (progress >= 1) {
+                if (progressBar) {
+                    setTimeout(() => {
+                        progressBar.style.display = 'none';
+                    }, 500);
+                }
+            }
+        });
+        
+        modelViewer.addEventListener('load', () => {
+            if (progressBar) progressBar.style.display = 'none';
+        });
+
+        modelViewer.addEventListener('error', (e) => {
+            console.error('Error loading model:', e);
+            if (progressBar) progressBar.style.display = 'none';
+        });
+    }
 </script>
 {% endblock %}

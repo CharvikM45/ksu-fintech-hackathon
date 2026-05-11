@@ -145,8 +145,16 @@ async function apiCall(endpoint, options = {}) {
     if (endpoint.startsWith('/api/ai/insights')) {
         return {
             insights: [
-                { icon: "💡", title: "Smart Spending", message: "You are spending 15% less on food this week." },
-                { icon: "📈", title: "TrustScore Target", message: "Regular micro-transactions are building your score." }
+                { 
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>`, 
+                    title: "Smart Spending", 
+                    message: "You are spending 15% less on food this week." 
+                },
+                { 
+                    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>`, 
+                    title: "TrustScore Target", 
+                    message: "Regular micro-transactions are building your score." 
+                }
             ]
         };
     }
@@ -351,7 +359,10 @@ function renderAlerts(fraudData) {
     let html = '';
     for (const alert of fraudData.alerts) {
         const cls = alert.type === 'warning' ? 'alert-warning' : 'alert-info';
-        html += `<div class="alert ${cls}"><span>⚡</span> ${alert.message}</div>`;
+        html += `<div class="alert ${cls}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+            ${alert.message}
+        </div>`;
     }
     container.innerHTML = html;
 }
@@ -374,7 +385,9 @@ function renderTransactionList(containerId, transactions) {
         const isSent = txn.direction === 'sent';
         const otherPartyId = isSent ? txn.receiver_id : txn.sender_id;
         const otherPartyName = isSent ? txn.receiver_name : txn.sender_name;
-        const icon = isSent ? '📤' : '📥';
+        const icon = isSent 
+            ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>` 
+            : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>`;
         const iconClass = isSent ? 'sent' : 'received';
         const name = isSent ? txn.receiver_name : txn.sender_name;
         const sign = isSent ? '-' : '+';
@@ -388,7 +401,10 @@ function renderTransactionList(containerId, transactions) {
                 <div class="txn-details">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div class="txn-name">${name} ${riskBadge}</div>
-                        <a href="#" style="font-size:0.7rem; color:var(--danger); text-decoration:none;" onclick="openReportModal('${txn.id}', '${otherPartyId}', '${otherPartyName}')">🚩 Report</a>
+                        <a href="#" style="font-size:0.7rem; color:var(--danger); text-decoration:none;" onclick="openReportModal('${txn.id}', '${otherPartyId}', '${otherPartyName}')">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:2px;"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                            Report
+                        </a>
                     </div>
                     <div class="txn-meta">${txn.type} • ${formatTime(txn.created_at)} ${txn.note ? '• ' + txn.note : ''}</div>
                 </div>
@@ -772,7 +788,10 @@ async function loadFraudReport() {
         if (data.alerts && data.alerts.length > 0) {
             for (const alert of data.alerts) {
                 const cls = alert.type === 'warning' ? 'alert-warning' : 'alert-info';
-                html += `<div class="alert ${cls}"><span>🛡️</span> ${alert.message}</div>`;
+                html += `<div class="alert ${cls}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    ${alert.message}
+                </div>`;
             }
         }
 
@@ -783,7 +802,9 @@ async function loadFraudReport() {
                 const badgeColor = t.risk_level === 'high' ? 'danger' : 'warning';
                 html += `
                     <div class="txn-item" onclick="showFraudDetail('${t.id}')" style="cursor:pointer; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2);">
-                        <div class="txn-icon sent" style="background: rgba(239, 68, 68, 0.2); color: var(--danger);">⚠️</div>
+                        <div class="txn-icon sent" style="background: rgba(239, 68, 68, 0.2); color: var(--danger);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        </div>
                         <div class="txn-details">
                             <div class="txn-name">Suspicious Transfer <span class="badge badge-${badgeColor}">${t.risk_level}</span></div>
                             <div class="txn-meta">${t.type} • ${formatTime(t.created_at)}</div>
