@@ -14,8 +14,8 @@
         position: relative;
         overflow: hidden;
         background:
-            radial-gradient(ellipse 70% 50% at 60% 0%, rgba(13,122,111,0.07) 0%, transparent 70%),
-            radial-gradient(ellipse 50% 40% at 10% 90%, rgba(212,151,42,0.06) 0%, transparent 60%),
+            radial-gradient(ellipse 70% 50% at 60% 0%, rgba(13, 122, 111, 0.07) 0%, transparent 70%),
+            radial-gradient(ellipse 50% 40% at 10% 90%, rgba(212, 151, 42, 0.06) 0%, transparent 60%),
             var(--bg-primary);
     }
 
@@ -25,7 +25,7 @@
         position: absolute;
         inset: 0;
         background-image: linear-gradient(var(--border) 1px, transparent 1px),
-                          linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            linear-gradient(90deg, var(--border) 1px, transparent 1px);
         background-size: 48px 48px;
         opacity: 0.25;
         pointer-events: none;
@@ -81,9 +81,9 @@
         border: 1px solid var(--border);
         border-radius: var(--radius-lg);
         box-shadow:
-            0 0 0 1px rgba(255,255,255,0.6) inset,
-            0 32px 64px -12px rgba(0,0,0,0.08),
-            0 8px 24px -4px rgba(0,0,0,0.04);
+            0 0 0 1px rgba(255, 255, 255, 0.6) inset,
+            0 32px 64px -12px rgba(0, 0, 0, 0.08),
+            0 8px 24px -4px rgba(0, 0, 0, 0.04);
         animation: float 7s ease-in-out infinite;
         display: flex;
         align-items: center;
@@ -96,8 +96,15 @@
     }
 
     @keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50%       { transform: translateY(-16px); }
+
+        0%,
+        100% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-16px);
+        }
     }
 
     /* ── Stats / Problem ── */
@@ -160,14 +167,14 @@
         align-items: center;
         justify-content: center;
         margin: 0 auto 1.75rem;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
         transition: border-color 0.3s, box-shadow 0.3s;
         color: #555;
     }
 
     .step:hover .step-icon {
         border-color: var(--accent-primary);
-        box-shadow: 0 0 0 4px rgba(13,122,111,0.08), 0 4px 16px rgba(0,0,0,0.06);
+        box-shadow: 0 0 0 4px rgba(13, 122, 111, 0.08), 0 4px 16px rgba(0, 0, 0, 0.06);
     }
 
     .step-num {
@@ -213,13 +220,17 @@
         border-bottom: 1px solid var(--border);
     }
 
-    .feature-row:last-child { border-bottom: none; }
+    .feature-row:last-child {
+        border-bottom: none;
+    }
 
     .feature-row:nth-child(even) {
         flex-direction: row-reverse;
     }
 
-    .feature-text { flex: 1; }
+    .feature-text {
+        flex: 1;
+    }
 
     .feature-icon-wrap {
         display: inline-flex;
@@ -227,7 +238,7 @@
         justify-content: center;
         width: 3rem;
         height: 3rem;
-        background: rgba(0,0,0,0.05);
+        background: rgba(0, 0, 0, 0.05);
         border-radius: var(--radius-md);
         margin-bottom: 1.5rem;
         color: #444;
@@ -287,7 +298,7 @@
         border-radius: var(--radius-lg);
         overflow: hidden;
         border: 1px solid var(--border-dark);
-        box-shadow: 0 40px 80px -20px rgba(0,0,0,0.6);
+        box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.6);
     }
 
     .iframe-wrap iframe {
@@ -298,15 +309,35 @@
 
     /* ── Responsive ── */
     @media (max-width: 900px) {
-        .steps-wrapper   { grid-template-columns: repeat(2, 1fr); gap: 3rem; }
-        .steps-connector { display: none; }
-        .feature-row, .feature-row:nth-child(even) { flex-direction: column; gap: 2.5rem; }
-        .feature-text p { max-width: none; }
+        .steps-wrapper {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3rem;
+        }
+
+        .steps-connector {
+            display: none;
+        }
+
+        .feature-row,
+        .feature-row:nth-child(even) {
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .feature-text p {
+            max-width: none;
+        }
     }
 
     @media (max-width: 600px) {
-        .stats-grid { grid-template-columns: 1fr; gap: 2.5rem; }
-        .steps-wrapper { grid-template-columns: 1fr; }
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
+        }
+
+        .steps-wrapper {
+            grid-template-columns: 1fr;
+        }
     }
 
     /* Model Viewer Styles */
@@ -316,7 +347,7 @@
         background-color: #0f0f0f;
         --poster-color: transparent;
     }
-    
+
     .progress-bar {
         display: block;
         width: 33%;
@@ -356,7 +387,8 @@
         </h1>
 
         <p class="hero-subtitle fade-up delay-200">
-            Bankify is a $35 Raspberry Pi-powered microbank that gives communities P2P transfers, merchant POS, and AI fraud detection — all completely offline.
+            Bankify is a $35 Raspberry Pi-powered microbank that gives communities P2P transfers, merchant POS, and AI
+            fraud detection — all completely offline.
         </p>
 
         <div class="hero-ctas fade-up delay-300">
@@ -376,7 +408,8 @@
     <div class="container">
         <div class="text-center" style="margin-bottom: 4rem;">
             <span class="section-label section-label-dark fade-up">Expected Impact</span>
-            <h2 class="fade-up delay-100" style="font-size: clamp(2rem, 3.5vw, 3rem); max-width: 600px; margin: 0 auto;">
+            <h2 class="fade-up delay-100"
+                style="font-size: clamp(2rem, 3.5vw, 3rem); max-width: 600px; margin: 0 auto;">
                 Financial exclusion is a systems problem.
             </h2>
         </div>
@@ -403,7 +436,8 @@
     <div class="container">
         <div class="text-center" style="margin-bottom: 1rem;">
             <span class="section-label fade-up">How It Works</span>
-            <h2 class="fade-up delay-100" style="font-size: clamp(2rem, 3.5vw, 2.8rem);">Four steps. Zero cloud required.</h2>
+            <h2 class="fade-up delay-100" style="font-size: clamp(2rem, 3.5vw, 2.8rem);">Four steps. Zero cloud
+                required.</h2>
         </div>
 
         <div class="steps-wrapper">
@@ -413,40 +447,69 @@
                 <div class="step-icon">
                     <span class="step-num">1</span>
                     <!-- Network icon (Raspberry Pi creates the local bank network) -->
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 5h4c0-2 2-3 2-5a4 4 0 0 0-4-4z"/><path d="M10 17v1a2 2 0 1 0 4 0v-1"/><path d="M8.5 11h7"/><circle cx="3" cy="12" r="1"/><circle cx="21" cy="12" r="1"/><path d="M4 12h4"/><path d="M16 12h4"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 5h4c0-2 2-3 2-5a4 4 0 0 0-4-4z" />
+                        <path d="M10 17v1a2 2 0 1 0 4 0v-1" />
+                        <path d="M8.5 11h7" />
+                        <circle cx="3" cy="12" r="1" />
+                        <circle cx="21" cy="12" r="1" />
+                        <path d="M4 12h4" />
+                        <path d="M16 12h4" />
+                    </svg>
                 </div>
                 <h3 class="step-title">Network</h3>
-                <p class="step-desc">A $35 Raspberry Pi broadcasts a local Wi-Fi hotspot, creating a sovereign microbank — no internet required.</p>
+                <p class="step-desc">A $35 Raspberry Pi broadcasts a local Wi-Fi hotspot, creating a sovereign microbank
+                    — no internet required.</p>
             </div>
 
             <div class="step fade-up delay-200">
                 <div class="step-icon">
                     <span class="step-num">2</span>
                     <!-- Transactions icon -->
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="17 1 21 5 17 9" />
+                        <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                        <polyline points="7 23 3 19 7 15" />
+                        <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+                    </svg>
                 </div>
                 <h3 class="step-title">Transactions</h3>
-                <p class="step-desc">Users make real community transactions — P2P transfers, POS payments — through a standard smartphone browser.</p>
+                <p class="step-desc">Users make real community transactions — P2P transfers, POS payments — through a
+                    standard smartphone browser.</p>
             </div>
 
             <div class="step fade-up delay-300">
                 <div class="step-icon">
                     <span class="step-num">3</span>
                     <!-- TrustScore icon -->
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        <path d="M9 12l2 2 4-4" />
+                    </svg>
                 </div>
                 <h3 class="step-title">TrustScore</h3>
-                <p class="step-desc">Community trust builds the TrustScore — a reputation metric derived from consistent, verified local activity.</p>
+                <p class="step-desc">Community trust builds the TrustScore — a reputation metric derived from
+                    consistent, verified local activity.</p>
             </div>
 
             <div class="step fade-up delay-400">
                 <div class="step-icon">
                     <span class="step-num">4</span>
                     <!-- Fair Credit icon -->
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><path d="M6 15h4"/><path d="M14 15h4"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="5" width="20" height="14" rx="2" />
+                        <line x1="2" y1="10" x2="22" y2="10" />
+                        <path d="M6 15h4" />
+                        <path d="M14 15h4" />
+                    </svg>
                 </div>
                 <h3 class="step-title">Fair Credit</h3>
-                <p class="step-desc">A better TrustScore unlocks fairer credit through microfinance partnerships — true financial inclusion.</p>
+                <p class="step-desc">A better TrustScore unlocks fairer credit through microfinance partnerships — true
+                    financial inclusion.</p>
             </div>
         </div>
     </div>
@@ -461,10 +524,17 @@
             <div class="feature-text">
                 <div class="feature-icon-wrap">
                     <!-- Shield/lock icon -->
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        <circle cx="12" cy="16" r="1" />
+                    </svg>
                 </div>
                 <h2>Bank-Grade Offline Security</h2>
-                <p>Every transaction is hash-chained and signed with secp256r1 ECDSA cryptography — the same math used in Bitcoin. Database-level locking with cryptographic UUIDs prevents double-spending even at the millisecond level.</p>
+                <p>Every transaction is hash-chained and signed with secp256r1 ECDSA cryptography — the same math used
+                    in Bitcoin. Database-level locking with cryptographic UUIDs prevents double-spending even at the
+                    millisecond level.</p>
             </div>
             <div class="feature-visual">[ Security Architecture ]</div>
         </div>
@@ -473,10 +543,16 @@
             <div class="feature-text">
                 <div class="feature-icon-wrap">
                     <!-- Storefront/POS icon -->
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
                 </div>
                 <h2>Vendor POS Mode</h2>
-                <p>Merchants get a dedicated point-of-sale interface that generates offline QR codes for instant payment. Accept payments, issue receipts, and reconcile totals — bypassing expensive card fees and the internet entirely.</p>
+                <p>Merchants get a dedicated point-of-sale interface that generates offline QR codes for instant
+                    payment. Accept payments, issue receipts, and reconcile totals — bypassing expensive card fees and
+                    the internet entirely.</p>
             </div>
             <div class="feature-visual">[ POS Interface Mockup ]</div>
         </div>
@@ -485,10 +561,17 @@
             <div class="feature-text">
                 <div class="feature-icon-wrap">
                     <!-- AI/brain icon -->
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 3 2 5.5 5 7v2h4v-2c3-1.5 5-4 5-7a7 7 0 0 0-7-7z"/><line x1="10" y1="22" x2="14" y2="22"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2a7 7 0 0 0-7 7c0 3 2 5.5 5 7v2h4v-2c3-1.5 5-4 5-7a7 7 0 0 0-7-7z" />
+                        <line x1="10" y1="22" x2="14" y2="22" />
+                        <line x1="9" y1="13" x2="15" y2="13" />
+                    </svg>
                 </div>
                 <h2>6-Layer AI Fraud Engine</h2>
-                <p>A heuristic AI engine runs natively on the Raspberry Pi — no cloud API required. It analyzes transaction velocity, historical baselines, and social graph trust to catch anomalies and freeze fraudulent transfers instantly.</p>
+                <p>A heuristic AI engine runs natively on the Raspberry Pi — no cloud API required. It analyzes
+                    transaction velocity, historical baselines, and social graph trust to catch anomalies and freeze
+                    fraudulent transfers instantly.</p>
             </div>
             <div class="feature-visual">[ AI Fraud Engine ]</div>
         </div>
@@ -497,10 +580,16 @@
             <div class="feature-text">
                 <div class="feature-icon-wrap">
                     <!-- Star/trust icon -->
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polygon
+                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
                 </div>
                 <h2>TrustScore Credit System</h2>
-                <p>Every verified transaction builds a user's community TrustScore — a reputation metric that unlocks fairer access to microfinance lending. Better behavior means better credit, powered entirely by local activity data.</p>
+                <p>Every verified transaction builds a user's community TrustScore — a reputation metric that unlocks
+                    fairer access to microfinance lending. Better behavior means better credit, powered entirely by
+                    local activity data.</p>
             </div>
             <div class="feature-visual">[ TrustScore Dashboard ]</div>
         </div>
@@ -508,58 +597,91 @@
 </section>
 
 <!-- ── DEMO ── -->
-<section id="demo" class="demo-section" style="background: var(--bg-dark); padding: 7rem 0; text-align: left; color: var(--text-inverse);">
+<section id="demo" class="demo-section"
+    style="background: var(--bg-dark); padding: 7rem 0; text-align: left; color: var(--text-inverse);">
     <div class="container">
         <div style="text-align: center; margin-bottom: 4rem;">
             <span class="section-label section-label-dark fade-up">Live Demo</span>
-            <h2 class="text-gradient-soft fade-up delay-100" style="font-size: clamp(2.5rem, 4vw, 3.5rem); margin-bottom: 1rem;">MeshBank Interactive Demo</h2>
-            <p class="fade-up delay-200" style="color: var(--text-inverse-2); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">Experience our offline UI instantly. This embedded demo simulates a fully functional mesh network node right in your browser.</p>
+            <h2 class="text-gradient-soft fade-up delay-100"
+                style="font-size: clamp(2.5rem, 4vw, 3.5rem); margin-bottom: 1rem;">MeshBank Interactive Demo</h2>
+            <p class="fade-up delay-200"
+                style="color: var(--text-inverse-2); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">Experience
+                our offline UI instantly. This embedded demo simulates a fully functional mesh network node right in
+                your browser.</p>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;">
             <div class="fade-up delay-300">
                 <h3 style="font-size: 1.8rem; margin-bottom: 1.5rem; color: #fff;">Interactive Walkthrough</h3>
-                
+
                 <div style="margin-bottom: 1.5rem;">
                     <div style="display: flex; gap: 1rem; align-items: flex-start;">
-                        <div style="background: var(--accent-primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">1</div>
+                        <div
+                            style="background: var(--accent-primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">
+                            1</div>
                         <div>
                             <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff;">The Login Screen</h4>
-                            <p style="color: var(--text-inverse-2); line-height: 1.6; font-size: 0.95rem;">Click on one of the "Demo Accounts" (like Alice) in the interface to the right to bypass authentication and instantly enter the simulated network.</p>
+                            <p style="color: var(--text-inverse-2); line-height: 1.6; font-size: 0.95rem;">Click on one
+                                of the "Demo Accounts" (like Alice) in the interface to the right to bypass
+                                authentication and instantly enter the simulated network.</p>
                         </div>
                     </div>
                 </div>
 
                 <div style="margin-bottom: 1.5rem;">
                     <div style="display: flex; gap: 1rem; align-items: flex-start;">
-                        <div style="background: var(--accent-primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">2</div>
+                        <div
+                            style="background: var(--accent-primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">
+                            2</div>
                         <div>
                             <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff;">The Dashboard</h4>
-                            <p style="color: var(--text-inverse-2); line-height: 1.6; font-size: 0.95rem;">Once inside, you'll see your mock balance and transaction history. Use the bottom navigation or quick action buttons to explore different features.</p>
+                            <p style="color: var(--text-inverse-2); line-height: 1.6; font-size: 0.95rem;">Once inside,
+                                you'll see your mock balance and transaction history. Use the bottom navigation or quick
+                                action buttons to explore different features.</p>
                         </div>
                     </div>
                 </div>
 
                 <div style="margin-bottom: 1.5rem;">
                     <div style="display: flex; gap: 1rem; align-items: flex-start;">
-                        <div style="background: var(--accent-primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">3</div>
+                        <div
+                            style="background: var(--accent-primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">
+                            3</div>
                         <div>
                             <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff;">Send Money Portion</h4>
-                            <p style="color: var(--text-inverse-2); line-height: 1.6; font-size: 0.95rem;">Click the <strong>Send</strong> button. Enter a phone number, amount, and any 4-digit PIN to securely sign the transaction. Watch as your balance updates instantly.</p>
+                            <p style="color: var(--text-inverse-2); line-height: 1.6; font-size: 0.95rem;">Click the
+                                <strong>Send</strong> button. Enter a phone number, amount, and any 4-digit PIN to
+                                securely sign the transaction. Watch as your balance updates instantly.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="fade-up delay-400" style="width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #1a1a1a; padding: 4rem 2rem; border-radius: var(--radius-lg); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 40px 80px -20px rgba(0,0,0,0.6);">
-                <div style="font-size: 5rem; margin-bottom: 1.5rem; line-height: 1; display: flex; justify-content: center;">
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.8;"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+            <div class="fade-up delay-400"
+                style="width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #1a1a1a; padding: 4rem 2rem; border-radius: var(--radius-lg); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 40px 80px -20px rgba(0,0,0,0.6);">
+                <div
+                    style="font-size: 5rem; margin-bottom: 1.5rem; line-height: 1; display: flex; justify-content: center;">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)"
+                        stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.8;">
+                        <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+                        <path d="M12 18h.01" />
+                    </svg>
                 </div>
-                <h3 style="color: #fff; margin-bottom: 1rem; text-align: center; font-size: 1.5rem;">Experience MeshBank Full Screen</h3>
-                <p style="color: var(--text-inverse-2); text-align: center; margin-bottom: 2.5rem; max-width: 350px; line-height: 1.6;">Launch the interactive demo in a dedicated environment to explore the complete offline banking interface.</p>
-                <a href="/demo/meshbank" target="_blank" class="btn btn-primary btn-lg" style="font-size: 1.1rem; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                <h3 style="color: #fff; margin-bottom: 1rem; text-align: center; font-size: 1.5rem;">Experience MeshBank
+                    Full Screen</h3>
+                <p
+                    style="color: var(--text-inverse-2); text-align: center; margin-bottom: 2.5rem; max-width: 350px; line-height: 1.6;">
+                    Launch the interactive demo in a dedicated environment to explore the complete offline banking
+                    interface.</p>
+                <a href="/demo/meshbank" target="_blank" class="btn btn-primary btn-lg"
+                    style="font-size: 1.1rem; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
                     Launch Interactive Demo
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
                 </a>
             </div>
         </div>
@@ -571,60 +693,111 @@
     <div class="container">
         <div class="grid" style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 5rem; align-items: center;">
             <div class="fade-up">
-                <span class="section-label" style="background: rgba(255,255,255,0.1); color: #fff; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.2);">Industrial Design</span>
-                <h2 class="text-gradient-soft" style="font-size: clamp(2.5rem, 4vw, 3.5rem); margin-bottom: 1.5rem;">The Bankify Terminal</h2>
+                <span class="section-label"
+                    style="background: rgba(255,255,255,0.1); color: #fff; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.2);">Industrial
+                    Design</span>
+                <h2 class="text-gradient-soft" style="font-size: clamp(2.5rem, 4vw, 3.5rem); margin-bottom: 1.5rem;">The
+                    Bankify Terminal</h2>
                 <p style="color: var(--text-secondary); font-size: 1.15rem; line-height: 1.6; margin-bottom: 2rem;">
-                    Our hardware is engineered for the most demanding environments on Earth. From the solar-integrated chassis to the long-range mesh antenna, every millimeter is designed for resilience, modularity, and accessibility.
+                    Our hardware is engineered for the most demanding environments on Earth. From the solar-integrated
+                    chassis to the long-range mesh antenna, every millimeter is designed for resilience, modularity, and
+                    accessibility.
                 </p>
-                
+
                 <div class="hardware-features" style="display: flex; flex-direction: column; gap: 1.5rem;">
                     <div style="display: flex; gap: 1.2rem; align-items: flex-start;">
-                        <div style="font-size: 1.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.94 5.41 17.94 3.1"/><path d="M8.06 5.41 6.06 3.1"/><path d="M12 16V6"/><path d="M12 16c3.31 0 6 2.69 6 6H6c0-3.31 2.69-6 6-6Z"/></svg>
+                        <div
+                            style="font-size: 1.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2v2" />
+                                <path d="m4.93 4.93 1.41 1.41" />
+                                <path d="M20 12h2" />
+                                <path d="m19.07 4.93-1.41 1.41" />
+                                <path d="M15.94 5.41 17.94 3.1" />
+                                <path d="M8.06 5.41 6.06 3.1" />
+                                <path d="M12 16V6" />
+                                <path d="M12 16c3.31 0 6 2.69 6 6H6c0-3.31 2.69-6 6-6Z" />
+                            </svg>
                         </div>
                         <div>
                             <h4 style="font-weight: 600; margin-bottom: 0.3rem;">Solar Autonomous</h4>
-                            <p style="color: var(--text-muted); font-size: 0.95rem;">High-efficiency integrated photovoltaic panels allow for continuous 24/7 operation in off-grid regions.</p>
+                            <p style="color: var(--text-muted); font-size: 0.95rem;">High-efficiency integrated
+                                photovoltaic panels allow for continuous 24/7 operation in off-grid regions.</p>
                         </div>
                     </div>
                     <div style="display: flex; gap: 1.2rem; align-items: flex-start;">
-                        <div style="font-size: 1.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"/><circle cx="12" cy="12" r="3"/><path d="M12 21V12"/><path d="M12 3V12"/><path d="M21 12H12"/><path d="M3 12H12"/></svg>
+                        <div
+                            style="font-size: 1.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z" />
+                                <circle cx="12" cy="12" r="3" />
+                                <path d="M12 21V12" />
+                                <path d="M12 3V12" />
+                                <path d="M21 12H12" />
+                                <path d="M3 12H12" />
+                            </svg>
                         </div>
                         <div>
                             <h4 style="font-weight: 600; margin-bottom: 0.3rem;">Mesh Networked</h4>
-                            <p style="color: var(--text-muted); font-size: 0.95rem;">Equipped with high-gain LoRa/WiFi mesh transceivers to form a localized financial backbone without the internet.</p>
+                            <p style="color: var(--text-muted); font-size: 0.95rem;">Equipped with high-gain LoRa/WiFi
+                                mesh transceivers to form a localized financial backbone without the internet.</p>
                         </div>
                     </div>
                     <div style="display: flex; gap: 1.2rem; align-items: flex-start;">
-                        <div style="font-size: 1.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        <div
+                            style="font-size: 1.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
                         </div>
                         <div>
                             <h4 style="font-weight: 600; margin-bottom: 0.3rem;">Ruggedized Chassis</h4>
-                            <p style="color: var(--text-muted); font-size: 0.95rem;">Impact-resistant, dust-proof, and water-resistant enclosure designed for lifelong field deployment.</p>
+                            <p style="color: var(--text-muted); font-size: 0.95rem;">Impact-resistant, dust-proof, and
+                                water-resistant enclosure designed for lifelong field deployment.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="cad-viewer-wrap fade-up delay-200" style="width: 100%; height: 600px; background: #0a0a0a; border-radius: var(--radius-xl); border: 1px solid rgba(255,255,255,0.1); overflow: hidden; box-shadow: 0 50px 100px -20px rgba(0,214,50,0.15); position: relative;">
-                <div style="position: absolute; top: 20px; left: 20px; z-index: 5; background: rgba(0,0,0,0.6); padding: 8px 16px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #fff;">
+            <div class="cad-viewer-wrap fade-up delay-200"
+                style="width: 100%; height: 600px; background: #0a0a0a; border-radius: var(--radius-xl); border: 1px solid rgba(255,255,255,0.1); overflow: hidden; box-shadow: 0 50px 100px -20px rgba(0,214,50,0.15); position: relative;">
+                <div
+                    style="position: absolute; top: 20px; left: 20px; z-index: 5; background: rgba(0,0,0,0.6); padding: 8px 16px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #fff;">
                     Live 3D CAD Model
                 </div>
-                <model-viewer src="{{ url_for('static', filename='assets/cad/Final Assembly.glb') }}" 
-                              alt="Bankify Terminal 3D CAD Model" 
-                              auto-rotate 
-                              camera-controls 
-                              shadow-intensity="1" 
-                              exposure="1"
-                              bounds="tight"
-                              enable-pan
-                              loading="eager"
-                              auto-rotate-delay="0">
+                <model-viewer src="{{ url_for('static', filename='assets/cad/final_assembly.glb') }}"
+                    alt="Bankify Terminal 3D CAD Model" auto-rotate camera-controls enable-pan bounds="tight"
+                    loading="eager" shadow-intensity="2" shadow-softness="0.8" exposure="0.85"
+                    environment-image="neutral" tone-mapping="commerce" auto-rotate-delay="1500"
+                    rotation-per-second="12deg">
+
                     <div class="progress-bar" slot="progress-bar">
                         <div class="update-bar"></div>
                     </div>
+
+                    <div slot="error" style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        height: 100%;
+                        flex-direction: column;
+                        gap: 1rem;
+                        color: rgba(255,255,255,0.3);
+                        font-size: 0.8rem;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        Model unavailable
+                    </div>
+
                 </model-viewer>
             </div>
         </div>
@@ -686,7 +859,7 @@
                 }
             }
         });
-        
+
         modelViewer.addEventListener('load', () => {
             console.log('Model loaded');
             if (progressBar) progressBar.style.display = 'none';
