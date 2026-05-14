@@ -18,14 +18,13 @@
         .walkthrough-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
             z-index: 9000;
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 24px;
+            pointer-events: none;
         }
         .walkthrough-overlay.active { display: flex; }
         .walkthrough-card {
@@ -38,6 +37,7 @@
             box-shadow: 0 0 50px rgba(0, 214, 50, 0.3);
             position: relative;
             animation: slideUp 0.4s ease;
+            pointer-events: auto;
         }
         .walkthrough-step-num {
             position: absolute;
@@ -73,14 +73,34 @@
             gap: 12px;
         }
         .highlight-element {
-            position: relative;
-            z-index: 9001 !important;
-            box-shadow: 0 0 0 4px var(--primary), 0 0 20px var(--primary-glow) !important;
-            pointer-events: auto !important;
+            /* We now use tour-highlighter for visuals, but keep this class for logic if needed */
+        }
+        #tour-highlighter {
+            position: fixed;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75), 0 0 20px var(--primary-glow);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-sm);
+            z-index: 8999;
+            pointer-events: none;
+            opacity: 0;
+            display: none;
+        }
+        #tour-highlighter.moving {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #tour-highlighter.subtle-highlight {
+            border: 3px solid var(--primary);
+            animation: pulseSubtle 2s infinite;
+        }
+        @keyframes pulseSubtle {
+            0% { box-shadow: 0 0 0 0 rgba(0, 214, 50, 0.6), inset 0 0 5px rgba(0, 214, 50, 0.3); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 214, 50, 0), inset 0 0 15px rgba(0, 214, 50, 0.5); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 214, 50, 0), inset 0 0 5px rgba(0, 214, 50, 0.3); }
         }
     </style>
 </head>
 <body>
+    <div id="tour-highlighter"></div>
     <!-- Premium Aurora Background -->
     <div class="bg-mesh"></div>
 
@@ -94,8 +114,7 @@
             <h3 id="walkthrough-title" class="walkthrough-title">Welcome to Bankify</h3>
             <p id="walkthrough-text" class="walkthrough-text">Let's take a quick tour of your new offline bank.</p>
             <div class="walkthrough-footer">
-                <button id="walkthrough-skip" class="btn btn-secondary flex-1" onclick="endWalkthrough()">Skip</button>
-                <button id="walkthrough-next" class="btn btn-primary flex-1" onclick="nextWalkthroughStep()">Next Step</button>
+                <button id="walkthrough-next" class="btn btn-primary flex-1" onclick="handleWalkthroughNextClick()">Next Step</button>
             </div>
         </div>
     </div>
@@ -141,7 +160,7 @@
                     <div class="demo-section">
                         <p class="demo-label">DEMO ACCOUNTS</p>
                         <div class="demo-buttons">
-                            <button class="btn btn-secondary btn-small" onclick="demoLogin('5551001', '1234')">
+                            <button id="tour-login-alice" class="btn btn-secondary btn-small" onclick="demoLogin('5551001', '1234')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
                                 Alice (Student) • 5551001 (1234)
                             </button>
@@ -241,7 +260,7 @@
                 </div>
 
                 <div class="quick-actions-grid">
-                    <button class="quick-action-card" onclick="navigateTo('send')">
+                    <button id="tour-qa-send" class="quick-action-card" onclick="navigateTo('send')">
                         <div class="qa-icon-wrapper send">
                             <span class="qa-icon">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
@@ -796,90 +815,224 @@
     <script>
         // Walkthrough Logic
         let currentStep = 0;
+        let walkthroughActive = false;
+        let walkthroughPhase = 'explaining';
+        let highlighterRaf = null;
+
+        function updateHighlighterPosition() {
+            if (walkthroughPhase === 'exploring' && walkthroughActive) {
+                const step = walkthroughSteps[currentStep];
+                if (step && step.element) {
+                    const highlightSelector = step.highlightTarget || step.element;
+                    const el = document.querySelector(highlightSelector);
+                    if (el) {
+                        const highlighter = document.getElementById('tour-highlighter');
+                        const rect = el.getBoundingClientRect();
+                        
+                        let padX = 8, padY = 8, radius = '8px';
+                        if (highlightSelector === '#tour-qa-send .qa-icon-wrapper') {
+                            padX = 8; padY = 8; radius = '50%';
+                        } else if (highlightSelector === '#tour-login-alice') {
+                            padX = 4; padY = 4; radius = '50px';
+                        } else if (highlightSelector.startsWith('#nav-')) {
+                            padX = 4; padY = 4; radius = '12px';
+                        }
+
+                        highlighter.style.top = (rect.top - padY) + 'px';
+                        highlighter.style.left = (rect.left - padX) + 'px';
+                        highlighter.style.width = (rect.width + padX * 2) + 'px';
+                        highlighter.style.height = (rect.height + padY * 2) + 'px';
+                        highlighter.style.borderRadius = radius;
+                    }
+                }
+            }
+            if (walkthroughActive) {
+                highlighterRaf = requestAnimationFrame(updateHighlighterPosition);
+            }
+        }
+
         const walkthroughSteps = [
             {
                 title: "Welcome to Bankify",
-                text: "MeshBank is now Bankify! This is a live interactive demo. Everything here is running in your browser.",
-                element: null
+                text: "This is a fully interactive demo. We will guide you through the app. To begin, click Explore, then click on Alice's demo account.",
+                element: "#tour-login-alice",
+                requireAction: true,
+                actionEvent: "login"
             },
             {
                 title: "The Dashboard",
-                text: "This is your main command center. You can see your balance and recent transactions here.",
-                element: "#page-dashboard"
+                text: "Welcome to your command center! Here you can see your balance, recent activity, and quick actions. When you're done looking around, click the 'Send' button.",
+                element: "#tour-qa-send",
+                highlightTarget: "#tour-qa-send .qa-icon-wrapper",
+                requireAction: true,
+                actionEvent: "nav-send"
             },
             {
-                title: "Quick Transfers",
-                text: "Use these buttons to quickly send or receive money from nearby mesh nodes.",
-                element: ".balance-actions"
+                title: "Send Page",
+                text: "Here you can enter a phone number and amount. All transfers are cryptographically signed and routed peer-to-peer. When you're ready, click 'Receive' in the dock.",
+                element: "#nav-receive",
+                requireAction: true,
+                actionEvent: "nav-receive"
             },
             {
-                title: "Send Money",
-                text: "Click 'Send' in the bottom dock to transfer funds via phone number. It works entirely offline!",
-                element: "#nav-send"
+                title: "Receive Money",
+                text: "You can display this QR code for others to scan, or send payment requests directly. Next, let's view our History. Click 'History' in the dock.",
+                element: "#nav-transactions",
+                requireAction: true,
+                actionEvent: "nav-transactions"
             },
             {
-                title: "AI Financial Insights",
-                text: "Our local AI analyzes your spending habits to provide smart tips and detect fraud.",
-                element: "#nav-ai"
+                title: "Transaction History",
+                text: "This page syncs your local offline ledger with the cloud whenever internet is restored. Now, let's check your TrustScore. Click 'Trust'.",
+                element: "#nav-credit",
+                requireAction: true,
+                actionEvent: "nav-credit"
             },
             {
                 title: "TrustScore",
-                text: "Your financial identity is based on community trust. Higher scores unlock micro-loans.",
-                element: "#nav-credit"
+                text: "Without traditional credit bureaus, Bankify uses local community trust to build your financial identity and unlock micro-loans. Finally, let's look at the AI. Click 'AI'.",
+                element: "#nav-ai",
+                requireAction: true,
+                actionEvent: "nav-ai"
             },
             {
-                title: "Ready to Explore?",
-                text: "Go ahead and try a demo login to see real data, or create your own account!",
-                element: ".demo-section"
+                title: "Local AI Insights",
+                text: "Our lightweight AI analyzes your spending habits and detects fraud entirely on-device, preserving your privacy.",
+                element: null,
+                requireAction: false
             }
         ];
 
         function startWalkthrough() {
             currentStep = 0;
+            walkthroughActive = true;
+            walkthroughPhase = 'explaining';
             document.getElementById('walkthrough-overlay').classList.add('active');
             updateWalkthrough();
+            if (!highlighterRaf) updateHighlighterPosition();
         }
 
         function endWalkthrough() {
+            walkthroughActive = false;
             document.getElementById('walkthrough-overlay').classList.remove('active');
-            const prevElement = walkthroughSteps[currentStep-1]?.element;
-            if (prevElement) {
-                const el = document.querySelector(prevElement);
-                if (el) el.classList.remove('highlight-element');
+            document.getElementById('tour-highlighter').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('tour-highlighter').style.display = 'none';
+            }, 500);
+        }
+
+        function handleWalkthroughNextClick() {
+            const step = walkthroughSteps[currentStep];
+            if (step.requireAction && walkthroughPhase === 'explaining') {
+                walkthroughPhase = 'exploring';
+                updateWalkthrough();
+            } else {
+                nextWalkthroughStep();
             }
         }
 
         function nextWalkthroughStep() {
+            if (!walkthroughActive) return;
+            
             currentStep++;
             if (currentStep >= walkthroughSteps.length) {
                 endWalkthrough();
             } else {
+                walkthroughPhase = 'explaining';
                 updateWalkthrough();
             }
         }
 
         function updateWalkthrough() {
             const step = walkthroughSteps[currentStep];
-            document.getElementById('walkthrough-step-badge').innerText = currentStep + 1;
-            document.getElementById('walkthrough-title').innerText = step.title;
-            document.getElementById('walkthrough-text').innerText = step.text;
-            document.getElementById('walkthrough-next').innerText = currentStep === walkthroughSteps.length - 1 ? "Get Started" : "Next Step";
+            const highlighter = document.getElementById('tour-highlighter');
+            const overlay = document.getElementById('walkthrough-overlay');
+            
+            if (walkthroughPhase === 'explaining') {
+                overlay.classList.add('active');
+                
+                document.getElementById('walkthrough-step-badge').innerText = currentStep + 1;
+                document.getElementById('walkthrough-title').innerText = step.title;
+                document.getElementById('walkthrough-text').innerText = step.text;
+                
+                const nextBtn = document.getElementById('walkthrough-next');
+                nextBtn.style.display = 'block';
+                if (step.requireAction) {
+                    nextBtn.innerText = "Explore";
+                } else {
+                    nextBtn.innerText = currentStep === walkthroughSteps.length - 1 ? "Finish" : "Next Step";
+                }
 
-            // Remove previous highlight
-            const prevStep = walkthroughSteps[currentStep - 1];
-            if (prevStep && prevStep.element) {
-                const prevEl = document.querySelector(prevStep.element);
-                if (prevEl) prevEl.classList.remove('highlight-element');
-            }
-
-            // Add new highlight
-            if (step.element) {
-                const el = document.querySelector(step.element);
-                if (el) {
-                    el.classList.add('highlight-element');
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                highlighter.style.opacity = '0';
+                highlighter.classList.remove('subtle-highlight');
+                
+            } else if (walkthroughPhase === 'exploring') {
+                overlay.classList.remove('active');
+                
+                if (step.element) {
+                    const highlightSelector = step.highlightTarget || step.element;
+                    const el = document.querySelector(highlightSelector);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        highlighter.style.display = 'block';
+                        highlighter.classList.add('subtle-highlight');
+                        highlighter.classList.add('moving');
+                        
+                        highlighter.style.opacity = '1';
+                        
+                        setTimeout(() => {
+                            highlighter.classList.remove('moving');
+                        }, 500); // Remove transition class after animation to ensure immediate scroll sticking
+                    }
                 }
             }
+        }
+
+        // Global Click Interceptor
+        document.addEventListener('click', function(e) {
+            if (!walkthroughActive) return;
+            const step = walkthroughSteps[currentStep];
+            
+            const card = document.querySelector('.walkthrough-card');
+            if (card && card.contains(e.target)) return;
+            
+            if (step && step.requireAction && walkthroughPhase === 'exploring' && step.element) {
+                const el = document.querySelector(step.element);
+                if (el && !el.contains(e.target)) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
+            } else if (walkthroughPhase === 'explaining') {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+        }, true); // Use capture phase
+
+        function handleWalkthroughAction(actionStr) {
+            if (!walkthroughActive) return;
+            const step = walkthroughSteps[currentStep];
+            if (step && step.requireAction && step.actionEvent === actionStr && walkthroughPhase === 'exploring') {
+                document.getElementById('tour-highlighter').style.opacity = '0';
+                setTimeout(nextWalkthroughStep, 400);
+            }
+        }
+
+        // Monkey-patch demoLogin
+        if (typeof window.demoLogin === 'function') {
+            const originalDemoLogin = window.demoLogin;
+            window.demoLogin = function(phone, pin) {
+                originalDemoLogin(phone, pin);
+                handleWalkthroughAction('login');
+            };
+        }
+
+        // Monkey-patch navigateTo
+        if (typeof window.navigateTo === 'function') {
+            const originalNavigateTo = window.navigateTo;
+            window.navigateTo = function(pageId) {
+                originalNavigateTo(pageId);
+                handleWalkthroughAction('nav-' + pageId);
+            };
         }
 
         // Auto-start walkthrough on first visit to demo
