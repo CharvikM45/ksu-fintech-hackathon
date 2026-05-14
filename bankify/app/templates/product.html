@@ -203,13 +203,35 @@
             zoom, and inspect the full hardware design — live from OnShape.</p>
 
         <div class="cad-container fade-up delay-200">
-            <model-viewer src="{{ url_for('static', filename='assets/cad/Final Assembly.glb') }}"
-                alt="Bankify Terminal 3D CAD Model" auto-rotate camera-controls shadow-intensity="1" exposure="1"
-                bounds="tight" enable-pan loading="eager" auto-rotate-delay="0"
-                style="width: 100%; height: 100%; background-color: var(--bg-primary);">
+            <model-viewer src="{{ url_for('static', filename='assets/cad/final_assembly.glb') }}"
+                alt="Bankify Terminal 3D CAD Model" auto-rotate camera-controls enable-pan bounds="tight"
+                loading="eager" shadow-intensity="2" shadow-softness="0.8" exposure="0.85" environment-image="neutral"
+                tone-mapping="commerce" auto-rotate-delay="1500" rotation-per-second="12deg">
+
                 <div class="progress-bar" slot="progress-bar">
                     <div class="update-bar"></div>
                 </div>
+
+                <div slot="error" style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        height: 100%;
+                        flex-direction: column;
+                        gap: 1rem;
+                        color: rgba(255,255,255,0.3);
+                        font-size: 0.8rem;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    Model unavailable
+                </div>
+
             </model-viewer>
         </div>
     </div>
