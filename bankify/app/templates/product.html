@@ -29,7 +29,10 @@
 
     .placeholder-skeleton {
         position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -98,7 +101,7 @@
 
     .hw-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
     }
 
     .badge {
@@ -110,8 +113,15 @@
         text-transform: uppercase;
     }
 
-    .badge-prototyping { background: rgba(212,151,42,0.12); color: var(--accent-gold); }
-    .badge-validated   { background: rgba(26,158,115,0.12); color: var(--success); }
+    .badge-prototyping {
+        background: rgba(212, 151, 42, 0.12);
+        color: var(--accent-gold);
+    }
+
+    .badge-validated {
+        background: rgba(26, 158, 115, 0.12);
+        color: var(--success);
+    }
 
     /* Specs Table */
     .specs-table {
@@ -124,7 +134,8 @@
         border: 1px solid var(--border);
     }
 
-    .specs-table th, .specs-table td {
+    .specs-table th,
+    .specs-table td {
         padding: 1.25rem;
         text-align: left;
         border-bottom: 1px solid var(--border);
@@ -137,8 +148,11 @@
     }
 
     @media (max-width: 900px) {
-        .arch-section { flex-direction: column; }
+        .arch-section {
+            flex-direction: column;
+        }
     }
+
     .progress-bar {
         display: block;
         width: 33%;
@@ -169,9 +183,12 @@
 {% block content %}
 <section class="page-hero">
     <div class="container fade-up">
-        <span class="section-label section-label-dark" style="display:block; margin-bottom: 1rem;">Product Deep Dive</span>
-        <h1 style="font-size: clamp(2.8rem, 5vw, 4.5rem); margin-bottom: 1.25rem; letter-spacing: -0.035em;">Engineering Resilience.</h1>
-        <p style="font-size: 1.15rem; color: var(--text-inverse-2); max-width: 600px; margin: 0 auto; line-height: 1.7;">
+        <span class="section-label section-label-dark" style="display:block; margin-bottom: 1rem;">Product Deep
+            Dive</span>
+        <h1 style="font-size: clamp(2.8rem, 5vw, 4.5rem); margin-bottom: 1.25rem; letter-spacing: -0.035em;">Engineering
+            Resilience.</h1>
+        <p
+            style="font-size: 1.15rem; color: var(--text-inverse-2); max-width: 600px; margin: 0 auto; line-height: 1.7;">
             Deep dive into the hardware and software systems powering Bankify's offline-first infrastructure.
         </p>
     </div>
@@ -180,24 +197,41 @@
 <section class="section">
     <div class="container">
         <span class="section-label fade-up">Hardware Design</span>
-        <h2 class="fade-up delay-100" style="font-size: clamp(2rem, 3.5vw, 2.75rem); margin-bottom: 0.75rem;">The Bankify Terminal</h2>
-        <p class="fade-up delay-200" style="color: var(--text-secondary); margin-bottom: 0; max-width: 560px;">Rotate, zoom, and inspect the full hardware design — live from OnShape.</p>
-        
+        <h2 class="fade-up delay-100" style="font-size: clamp(2rem, 3.5vw, 2.75rem); margin-bottom: 0.75rem;">The
+            Bankify Terminal</h2>
+        <p class="fade-up delay-200" style="color: var(--text-secondary); margin-bottom: 0; max-width: 560px;">Rotate,
+            zoom, and inspect the full hardware design — live from OnShape.</p>
+
         <div class="cad-container fade-up delay-200">
-            <model-viewer src="{{ url_for('static', filename='assets/cad/Final Assembly.glb') }}" 
-                          alt="Bankify Terminal 3D CAD Model" 
-                          auto-rotate 
-                          camera-controls 
-                          shadow-intensity="1" 
-                          exposure="1"
-                          bounds="tight"
-                          enable-pan
-                          loading="eager"
-                          auto-rotate-delay="0"
-                          style="width: 100%; height: 100%; background-color: var(--bg-primary);">
+            <model-viewer src="{{ url_for('static', filename='assets/cad/final_assembly.glb') }}"
+                alt="Bankify Terminal 3D CAD Model" auto-rotate camera-controls enable-pan bounds="tight"
+                loading="eager" shadow-intensity="2" shadow-softness="0.8" exposure="0.85" environment-image="neutral"
+                tone-mapping="commerce" auto-rotate-delay="1500" rotation-per-second="12deg">
+
                 <div class="progress-bar" slot="progress-bar">
                     <div class="update-bar"></div>
                 </div>
+
+                <div slot="error" style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        height: 100%;
+                        flex-direction: column;
+                        gap: 1rem;
+                        color: rgba(255,255,255,0.3);
+                        font-size: 0.8rem;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    Model unavailable
+                </div>
+
             </model-viewer>
         </div>
     </div>
@@ -206,49 +240,65 @@
 <section class="section bg-dark">
     <div class="container">
         <span class="section-label section-label-dark fade-up">Architecture</span>
-        <h2 class="fade-up delay-100" style="font-size: clamp(2rem, 3.5vw, 2.75rem); margin-bottom: 3rem;">How the system <span class="text-gradient-soft">fits together.</span></h2>
-        
+        <h2 class="fade-up delay-100" style="font-size: clamp(2rem, 3.5vw, 2.75rem); margin-bottom: 3rem;">How the
+            system <span class="text-gradient-soft">fits together.</span></h2>
+
         <div class="arch-section fade-up delay-100">
             <div class="arch-diagram">
                 <!-- SVG Block Diagram -->
-<svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
+                <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="nodeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" style="stop-color:var(--bg-primary);stop-opacity:1" />
                             <stop offset="100%" style="stop-color:var(--bg-surface);stop-opacity:1" />
                         </linearGradient>
-                        <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"
+                            markerUnits="strokeWidth">
                             <path d="M0,0 L0,6 L8,3 z" fill="#7ECFC8" />
                         </marker>
                     </defs>
 
                     <!-- Edges -->
-                    <path d="M 210 160 L 315 160" stroke="var(--text-muted)" stroke-width="2" stroke-dasharray="6,4" fill="none" marker-end="url(#arrow)"/>
-                    <path d="M 485 160 L 590 160" stroke="var(--text-muted)" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                    <path d="M 210 160 L 315 160" stroke="var(--text-muted)" stroke-width="2" stroke-dasharray="6,4"
+                        fill="none" marker-end="url(#arrow)" />
+                    <path d="M 485 160 L 590 160" stroke="var(--text-muted)" stroke-width="2" fill="none"
+                        marker-end="url(#arrow)" />
 
                     <!-- Nodes -->
                     <g class="arch-block" onclick="showArchDetails('client')">
-                        <rect x="50" y="120" width="160" height="80" rx="12" fill="url(#nodeGrad)" stroke="var(--border)" stroke-width="1.5"/>
-                        <text x="130" y="155" font-family="'Syne', sans-serif" font-size="14" font-weight="700" fill="var(--text-primary)" text-anchor="middle">Client POS</text>
-                        <text x="130" y="175" font-family="'Manrope', sans-serif" font-size="11" fill="var(--text-secondary)" text-anchor="middle">Mobile / Terminal</text>
+                        <rect x="50" y="120" width="160" height="80" rx="12" fill="url(#nodeGrad)"
+                            stroke="var(--border)" stroke-width="1.5" />
+                        <text x="130" y="155" font-family="'Syne', sans-serif" font-size="14" font-weight="700"
+                            fill="var(--text-primary)" text-anchor="middle">Client POS</text>
+                        <text x="130" y="175" font-family="'Manrope', sans-serif" font-size="11"
+                            fill="var(--text-secondary)" text-anchor="middle">Mobile / Terminal</text>
                     </g>
 
                     <g class="arch-block" onclick="showArchDetails('local_ledger')">
-                        <rect x="315" y="120" width="170" height="80" rx="12" fill="url(#nodeGrad)" stroke="var(--border)" stroke-width="1.5"/>
-                        <text x="400" y="155" font-family="'Syne', sans-serif" font-size="14" font-weight="700" fill="var(--text-primary)" text-anchor="middle">Local Ledger</text>
-                        <text x="400" y="175" font-family="'Manrope', sans-serif" font-size="11" fill="var(--text-secondary)" text-anchor="middle">SQLite + Hash-chain</text>
+                        <rect x="315" y="120" width="170" height="80" rx="12" fill="url(#nodeGrad)"
+                            stroke="var(--border)" stroke-width="1.5" />
+                        <text x="400" y="155" font-family="'Syne', sans-serif" font-size="14" font-weight="700"
+                            fill="var(--text-primary)" text-anchor="middle">Local Ledger</text>
+                        <text x="400" y="175" font-family="'Manrope', sans-serif" font-size="11"
+                            fill="var(--text-secondary)" text-anchor="middle">SQLite + Hash-chain</text>
                     </g>
 
                     <g class="arch-block" onclick="showArchDetails('cloud_sync')">
-                        <rect x="590" y="120" width="160" height="80" rx="12" fill="url(#nodeGrad)" stroke="var(--border)" stroke-width="1.5"/>
-                        <text x="670" y="155" font-family="'Syne', sans-serif" font-size="14" font-weight="700" fill="var(--text-primary)" text-anchor="middle">Cloud Sync</text>
-                        <text x="670" y="175" font-family="'Manrope', sans-serif" font-size="11" fill="var(--text-secondary)" text-anchor="middle">Delta Reconciliation</text>
+                        <rect x="590" y="120" width="160" height="80" rx="12" fill="url(#nodeGrad)"
+                            stroke="var(--border)" stroke-width="1.5" />
+                        <text x="670" y="155" font-family="'Syne', sans-serif" font-size="14" font-weight="700"
+                            fill="var(--text-primary)" text-anchor="middle">Cloud Sync</text>
+                        <text x="670" y="175" font-family="'Manrope', sans-serif" font-size="11"
+                            fill="var(--text-secondary)" text-anchor="middle">Delta Reconciliation</text>
                     </g>
                 </svg>
             </div>
             <div class="arch-panel">
-                <h3 id="panel-title" style="font-family: var(--font-display); font-size: 1.4rem; margin-bottom: 0.75rem; color: var(--text-primary); transition: opacity 0.2s;">Select a Subsystem</h3>
-                <p id="panel-desc" style="color: var(--text-secondary); line-height: 1.7; font-size: 0.95rem; transition: opacity 0.2s;">
+                <h3 id="panel-title"
+                    style="font-family: var(--font-display); font-size: 1.4rem; margin-bottom: 0.75rem; color: var(--text-primary); transition: opacity 0.2s;">
+                    Select a Subsystem</h3>
+                <p id="panel-desc"
+                    style="color: var(--text-secondary); line-height: 1.7; font-size: 0.95rem; transition: opacity 0.2s;">
                     Click any block in the diagram to explore how that part of the system works.
                 </p>
             </div>
@@ -259,12 +309,21 @@
 <section class="section">
     <div class="container">
         <span class="section-label fade-up">Hardware</span>
-        <h2 class="fade-up delay-100" style="font-size: clamp(2rem, 3.5vw, 2.75rem); margin-bottom: 0.5rem;">Subsystem Breakdown</h2>
-        
+        <h2 class="fade-up delay-100" style="font-size: clamp(2rem, 3.5vw, 2.75rem); margin-bottom: 0.5rem;">Subsystem
+            Breakdown</h2>
+
         <div class="hw-grid">
             <div class="hw-card fade-up delay-100">
                 <div style="margin-bottom: 1rem; color: #3B2F2B;">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h2"/><path d="M20 12h2"/><path d="M6 12a6 6 0 0 1 12 0"/><path d="M9 12a3 3 0 0 1 6 0"/><circle cx="12" cy="12" r="1"/><path d="M12 13v4"/></svg>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 12h2" />
+                        <path d="M20 12h2" />
+                        <path d="M6 12a6 6 0 0 1 12 0" />
+                        <path d="M9 12a3 3 0 0 1 6 0" />
+                        <circle cx="12" cy="12" r="1" />
+                        <path d="M12 13v4" />
+                    </svg>
                 </div>
                 <h3 style="margin-bottom: 0.5rem;">Mesh Transceiver</h3>
                 <span class="badge badge-prototyping">Prototyping</span>
@@ -272,10 +331,15 @@
                     Low-power LoRa based transceiver to facilitate P2P connection even when cellular networks fail.
                 </p>
             </div>
-            
+
             <div class="hw-card fade-up delay-200">
                 <div style="margin-bottom: 1rem; color: #3B2F2B;">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        <circle cx="12" cy="16" r="1" />
+                    </svg>
                 </div>
                 <h3 style="margin-bottom: 0.5rem;">Secure Enclave</h3>
                 <span class="badge badge-validated">Validated</span>
@@ -283,10 +347,17 @@
                     Hardware-isolated environment for cryptographic signing and key storage ensuring tamper-proof logs.
                 </p>
             </div>
-            
+
             <div class="hw-card fade-up delay-300">
                 <div style="margin-bottom: 1rem; color: #3B2F2B;">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><line x1="10" y1="6" x2="14" y2="6"/><line x1="10" y1="10" x2="14" y2="10"/><line x1="10" y1="14" x2="14" y2="14"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="6" y="2" width="12" height="20" rx="2" />
+                        <line x1="10" y1="6" x2="14" y2="6" />
+                        <line x1="10" y1="10" x2="14" y2="10" />
+                        <line x1="10" y1="14" x2="14" y2="14" />
+                        <line x1="10" y1="18" x2="14" y2="18" />
+                    </svg>
                 </div>
                 <h3 style="margin-bottom: 0.5rem;">Power Management</h3>
                 <span class="badge badge-validated">Validated</span>
@@ -301,7 +372,7 @@
 <section class="section" style="background: var(--bg-surface);">
     <div class="container">
         <h2 class="fade-up" style="font-size: 2.5rem; margin-bottom: 2rem;">Technical Specifications</h2>
-        
+
         <div class="fade-up delay-100">
             <table class="specs-table">
                 <thead>
@@ -357,13 +428,13 @@
         }
     };
 
-    window.showArchDetails = function(nodeId) {
+    window.showArchDetails = function (nodeId) {
         const titleEl = document.getElementById('panel-title');
         const descEl = document.getElementById('panel-desc');
-        
+
         titleEl.style.opacity = 0;
         descEl.style.opacity = 0;
-        
+
         setTimeout(() => {
             titleEl.innerText = details[nodeId].title;
             descEl.innerText = details[nodeId].desc;
@@ -389,7 +460,7 @@
                 }
             }
         });
-        
+
         modelViewer.addEventListener('load', () => {
             if (progressBar) progressBar.style.display = 'none';
         });
